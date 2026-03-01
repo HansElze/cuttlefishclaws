@@ -15,6 +15,8 @@
 <meta name="twitter:creator" content="@CephAgent">
 <meta name="author" content="Cuttlefish Labs">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐙</text></svg>">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#00E5FF">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -79,6 +81,45 @@
   @keyframes pulse-grid {
     0%, 100% { opacity: 0.3; }
     50% { opacity: 0.6; }
+  }
+
+  /* ── INTERACTIVE CONTRACT ADDRESSES ── */
+  .contract-address {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 2px 6px;
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .contract-address:hover {
+    background: rgba(0, 229, 255, 0.1);
+    color: var(--biolume-cyan);
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+  }
+
+  /* ── TOAST NOTIFICATIONS ── */
+  .toast {
+    background: linear-gradient(135deg, var(--electric-teal), var(--biolume-cyan));
+    color: var(--black);
+    padding: 12px 20px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 20px rgba(0, 229, 255, 0.3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s forwards;
+    position: relative;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes slideOut {
+    to { transform: translateX(100%); opacity: 0; }
   }
 
   /* ── NAV ── */
@@ -914,6 +955,9 @@
 </head>
 <body>
 
+<!-- Toast Notification Container -->
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
+
 <!-- NAV -->
 <nav>
   <div class="nav-logo">
@@ -1359,14 +1403,14 @@
   <div class="dao-arch">
 <pre>
 <span class="teal">CACProtocol</span> <span class="dim">← master (Cuttlefish Labs multisig)</span>
-├── <span class="teal">TrustGraph</span>            <span class="dim">0x5FbDB2315678afecb367f032d93F642f64180aa3</span>
-├── <span class="teal">CACTransferProtocol</span>   <span class="dim">0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512</span>
-├── <span class="teal">FeeRouter</span>             <span class="dim">0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0</span>
-├── <span class="teal">AgentBillOfRights</span>     <span class="dim">0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9</span>
-├── <span class="teal">CACToken</span>              <span class="dim">0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9</span>
-├── <span class="amber">FounderShare</span>          <span class="dim">0x5FC8d32690cc91D4c39d9d3abcBD16989F875707</span>
-├── <span class="amber">GovernanceModule</span>      <span class="dim">0x0165878A594ca255338adfa4d48449f69242Eb8F</span>
-└── <span class="teal">TributaryProperty</span>    <span class="dim">0xa513E6E4b8f2a923D98304ec87F64353C4D5C853</span>
+├── <span class="teal">TrustGraph</span>            <span class="contract-address dim" onclick="copyAddress('0x5FbDB2315678afecb367f032d93F642f64180aa3')" title="Click to copy">0x5FbDB2315678afecb367f032d93F642f64180aa3</span>
+├── <span class="teal">CACTransferProtocol</span>   <span class="contract-address dim" onclick="copyAddress('0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512')" title="Click to copy">0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512</span>
+├── <span class="teal">FeeRouter</span>             <span class="contract-address dim" onclick="copyAddress('0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0')" title="Click to copy">0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0</span>
+├── <span class="teal">AgentBillOfRights</span>     <span class="contract-address dim" onclick="copyAddress('0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9')" title="Click to copy">0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9</span>
+├── <span class="teal">CACToken</span>              <span class="contract-address dim" onclick="copyAddress('0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9')" title="Click to copy">0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9</span>
+├── <span class="amber">FounderShare</span>          <span class="contract-address dim" onclick="copyAddress('0x5FC8d32690cc91D4c39d9d3abcBD16989F875707')" title="Click to copy">0x5FC8d32690cc91D4c39d9d3abcBD16989F875707</span>
+├── <span class="amber">GovernanceModule</span>      <span class="contract-address dim" onclick="copyAddress('0x0165878A594ca255338adfa4d48449f69242Eb8F')" title="Click to copy">0x0165878A594ca255338adfa4d48449f69242Eb8F</span>
+└── <span class="teal">TributaryProperty</span>    <span class="contract-address dim" onclick="copyAddress('0xa513E6E4b8f2a923D98304ec87F64353C4D5C853')" title="Click to copy">0xa513E6E4b8f2a923D98304ec87F64353C4D5C853</span>
 
 <span class="dim">Network:</span>    Hardhat Local · Deployer 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 <span class="dim">Settlement:</span> Base (Coinbase L2) · USDC · AgentKit wallets
@@ -1447,4 +1491,78 @@
   <div class="footer-brand">Cuttlefish Labs</div>
   <div class="footer-legal">
     Tributary AI Campus · 3196 US-280 · Birmingham, AL 35243<br>
-    © 2026 Cuttlefish Labs Corporati
+    © 2026 Cuttlefish Labs Corporation
+  </div>
+</footer>
+
+<!-- INTERACTIVE JAVASCRIPT -->
+<script>
+// Copy contract address to clipboard
+function copyAddress(address) {
+  navigator.clipboard.writeText(address).then(() => {
+    showToast(`Contract address copied: ${address.slice(0, 10)}...`);
+  }).catch(() => {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = address;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    showToast(`Contract address copied: ${address.slice(0, 10)}...`);
+  });
+}
+
+// Show toast notification
+function showToast(message) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+  
+  // Auto-remove after animation
+  setTimeout(() => {
+    if (toast.parentElement) {
+      container.removeChild(toast);
+    }
+  }, 3000);
+}
+
+// Smooth scroll for navigation links
+document.addEventListener('DOMContentLoaded', () => {
+  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+  
+  // Fade-up animations on scroll
+  const observerOptions = { 
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+  
+  // Observe fade-up elements
+  document.querySelectorAll('.fade-up').forEach(el => {
+    observer.observe(el);
+  });
+});
+</script>
+
+</body>
+</html>
