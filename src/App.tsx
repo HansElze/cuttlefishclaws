@@ -47,40 +47,33 @@ export default function App() {
         if (status === 'connected') fetchSessions();
       }
 
-      if (ev.event === 'chat.delta') {
-        const p = ev.payload as { text?: string; chunk?: string };
-        const text = p.text || p.chunk || '';
+      // Handle real-time chat streaming events from gateway
+      if (ev.event === 'chat') {
+        const p = ev.payload as { sessionKey?: string; state?: string; message?: { role: string; content: Array<{ type: string; text?: string }> } };
+        if (!p.sessionKey || !p.message || p.message.role !== 'assistant') return;
+
+        const text = p.message.content?.filter(c => c.type === 'text').map(c => c.text || '').join('') || '';
         if (!text) return;
 
         setChatHistory(prev => {
           const updated = { ...prev };
-          for (const key of Object.keys(updated)) {
-            const msgs = [...updated[key]];
-            const last = msgs[msgs.length - 1];
-            if (last && last.streaming) {
-              msgs[msgs.length - 1] = { ...last, content: last.content + text };
-              updated[key] = msgs;
-            }
+          const msgs = [...(updated[p.sessionKey!] || [])];
+          const last = msgs[msgs.length - 1];
+          if (last && last.streaming) {
+            msgs[msgs.length - 1] = {
+              ...last,
+              content: text,
+              streaming: p.state !== 'final',
+            };
+            updated[p.sessionKey!] = msgs;
           }
           return updated;
         });
-      }
 
-      if (ev.event === 'chat.done') {
-        setChatHistory(prev => {
-          const updated = { ...prev };
-          for (const key of Object.keys(updated)) {
-            const msgs = [...updated[key]];
-            const last = msgs[msgs.length - 1];
-            if (last && last.streaming) {
-              msgs[msgs.length - 1] = { ...last, streaming: false };
-              updated[key] = msgs;
-            }
-          }
-          return updated;
-        });
-        setStreamingId(null);
-        _streamingRef.current = null;
+        if (p.state === 'final') {
+          setStreamingId(null);
+          _streamingRef.current = null;
+        }
       }
     });
 
@@ -124,11 +117,16 @@ export default function App() {
     setChatHistory(prev => ({ ...prev, [key]: [...(prev[key] || []), userMsg, assistantMsg] }));
     setStreamingId(assistantMsg.id);
     try {
-      await request('chat.send', {
+      const result = await request('agent', {
         message: 'read MEMORY.md',
-        idempotencyKey: `dk-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         sessionKey: agent.sessionKey,
+        idempotencyKey: `dk-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        deliver: false,
+        channel: 'webchat',
       });
+      const res = result as { result?: { payloads?: Array<{ text?: string }> } };
+      const finalText = res?.result?.payloads?.map(p => p.text).filter(Boolean).join('\n');
+      if (finalText) handleUpdateStreaming(assistantMsg.id, finalText, true);
     } catch (e) {
       handleUpdateStreaming(assistantMsg.id, `Error: ${e}`, true);
     }

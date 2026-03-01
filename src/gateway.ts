@@ -42,31 +42,48 @@ export function connect() {
 
   ws.onmessage = (ev) => {
     let msg: { type: string; [k: string]: unknown };
-    try { msg = JSON.parse(ev.data); } catch { return; }
+    try { msg = JSON.parse(ev.data as string); } catch { return; }
 
+    // Handle connect challenge from gateway
     if (msg.type === 'event' && (msg as { event?: string }).event === 'connect.challenge') {
       const token = getToken();
       const authReq = {
         type: 'req',
         id: `auth-${Date.now()}`,
         method: 'connect',
-        params: { token, client: 'cuttlefishclaws-dashboard', role: 'operator' }
+        params: {
+          minProtocol: 3,
+          maxProtocol: 3,
+          client: {
+            id: 'webchat-ui',
+            version: '0.1.0',
+            platform: 'web',
+            mode: 'webchat'
+          },
+          auth: {
+            token
+          },
+          scopes: ['operator.write']
+        }
       };
       ws!.send(JSON.stringify(authReq));
       return;
     }
 
+    // Handle auth response
     if (msg.type === 'res' && (msg as { id?: string }).id?.startsWith('auth-')) {
-      const res = msg as { ok?: boolean };
+      const res = msg as { ok?: boolean; error?: unknown };
       if (res.ok) {
         authenticated = true;
         emit({ type: 'event', event: 'connection.status', payload: { status: 'connected' } } as never);
       } else {
+        console.error('[gateway] Auth failed:', res.error);
         emit({ type: 'event', event: 'connection.status', payload: { status: 'auth-failed' } } as never);
       }
       return;
     }
 
+    // Handle request responses
     if (msg.type === 'res') {
       const id = (msg as unknown as { id: string }).id;
       const p = pending.get(id);
@@ -78,6 +95,7 @@ export function connect() {
       }
     }
 
+    // Emit all messages to listeners
     emit(msg);
   };
 

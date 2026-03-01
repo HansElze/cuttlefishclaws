@@ -43,11 +43,20 @@ export default function ChatPanel({ agent, messages, onNewMessage, onUpdateStrea
     onNewMessage(assistantMsg);
 
     try {
-      await request('chat.send', {
+      const idemKey = `dk-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const result = await request('agent', {
         message: text,
-        idempotencyKey: `dk-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         sessionKey: agent.sessionKey,
+        idempotencyKey: idemKey,
+        deliver: false,
+        channel: 'webchat',
       });
+      // Final result comes back with full text
+      const res = result as { result?: { payloads?: Array<{ text?: string }> } };
+      const finalText = res?.result?.payloads?.map(p => p.text).filter(Boolean).join('\n');
+      if (finalText) {
+        onUpdateStreaming(assistantId, finalText, true);
+      }
     } catch (e) {
       onUpdateStreaming(assistantId, `Error: ${e}`, true);
     }
