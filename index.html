@@ -1,13 +1,1422 @@
-<!doctype html>
-<html lang="en" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cuttlefish Claws — Swarm Dashboard</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tributary AI Campus — Constitutional Governance DAO-REIT | Cuttlefish Labs</title>
+<meta name="description" content="Live DAO-REIT platform with constitutional governance for AI agents. Tributary AI Campus - 420K SF former AT&T facility in Birmingham, AL. Experience the future of agent economics.">
+<meta name="keywords" content="DAO, REIT, AI agents, constitutional governance, Cuttlefish Labs, Tributary, Birmingham">
+<meta property="og:title" content="Tributary AI Campus — Constitutional Governance DAO-REIT">
+<meta property="og:description" content="Live DAO-REIT platform with constitutional governance for AI agents. 420K SF campus in Birmingham, AL.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cuttlefishclaws.com">
+<meta property="og:image" content="https://cuttlefishclaws.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@CephAgent">
+<meta name="author" content="Cuttlefish Labs">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐙</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080a0c;
+    --off-black: #0e1115;
+    --surface: #13171d;
+    --surface-2: #1a1f28;
+    --border: #232830;
+    --border-light: #2d3540;
+    --teal: #00d4b4;
+    --teal-dim: #00a88f;
+    --teal-glow: rgba(0,212,180,0.12);
+    --amber: #f59e0b;
+    --amber-dim: rgba(245,158,11,0.15);
+    --red: #ef4444;
+    --text: #e8edf5;
+    --text-dim: #8892a4;
+    --text-muted: #4a5568;
+    --font-serif: 'DM Serif Display', Georgia, serif;
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+    --font-sans: 'Syne', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,180,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,180,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(8,10,12,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--teal);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .nav-logo-mark {
+    width: 32px; height: 32px;
+    border: 1.5px solid var(--teal);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--teal); }
+
+  .nav-cta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--black);
+    background: var(--teal);
+    padding: 8px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background 0.2s;
+  }
+
+  .nav-cta:hover { background: var(--teal-dim); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 48px 80px;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(0,212,180,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    background: var(--teal-glow);
+    border: 1px solid rgba(0,212,180,0.2);
+    padding: 6px 14px;
+    border-radius: 100px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--teal);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(52px, 7vw, 96px);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--teal);
+  }
+
+  .hero-sub {
+    font-family: var(--font-serif);
+    font-size: clamp(20px, 3vw, 32px);
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 32px;
+    line-height: 1.3;
+  }
+
+  .hero-desc {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 560px;
+    margin-bottom: 48px;
+    line-height: 1.7;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--black);
+    background: var(--teal);
+    padding: 14px 28px;
+    border-radius: 4px;
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--teal-dim);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--teal);
+    background: transparent;
+    padding: 14px 28px;
+    border-radius: 4px;
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid rgba(0,212,180,0.3);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--teal);
+    background: var(--teal-glow);
+  }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    position: relative;
+    z-index: 1;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 48px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+  }
+
+  .stat-item {
+    padding: 0 32px;
+    border-right: 1px solid var(--border);
+  }
+
+  .stat-item:first-child { padding-left: 0; }
+  .stat-item:last-child { border-right: none; }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-value.green { color: var(--teal); }
+  .stat-value.amber { color: var(--amber); }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 96px 48px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: clamp(36px, 4vw, 56px);
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .section-title em { font-style: italic; color: var(--teal); }
+
+  .section-desc {
+    font-size: 16px;
+    color: var(--text-dim);
+    max-width: 600px;
+    line-height: 1.75;
+    margin-bottom: 64px;
+  }
+
+  /* ── PROPERTY CARD ── */
+  .property-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .property-map {
+    background: var(--surface);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .property-map-art {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+  }
+
+  .property-details {
+    background: var(--surface);
+    padding: 48px;
+  }
+
+  .property-address {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--teal);
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+
+  .property-name {
+    font-family: var(--font-serif);
+    font-size: 36px;
+    color: var(--text);
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+
+  .property-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .spec-item {}
+  .spec-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .spec-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .spec-value.highlight { color: var(--teal); }
+
+  .basis-bar {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin-top: 16px;
+  }
+
+  .basis-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .basis-track {
+    height: 6px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .basis-fill {
+    height: 100%;
+    width: 2.08%;
+    background: var(--teal);
+    border-radius: 100px;
+  }
+
+  .basis-markers {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  .basis-markers span:first-child { color: var(--teal); }
+  .basis-markers span:last-child { color: var(--text-muted); }
+
+  /* ── CAC TIERS ── */
+  .tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .tier-card {
+    background: var(--surface);
+    padding: 36px 28px;
+    position: relative;
+    transition: background 0.2s;
+    cursor: default;
+  }
+
+  .tier-card:hover { background: var(--surface-2); }
+
+  .tier-card.featured {
+    background: linear-gradient(135deg, var(--surface-2) 0%, rgba(0,212,180,0.05) 100%);
+    border-top: 2px solid var(--teal);
+  }
+
+  .tier-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .tier-card.featured .tier-badge { color: var(--teal); }
+
+  .tier-name {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .tier-price {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--teal);
+    margin-bottom: 24px;
+  }
+
+  .tier-price span {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  .tier-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tier-features li {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tier-features li::before {
+    content: '→';
+    color: var(--teal);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* ── CAPITAL STACK ── */
+  .capital-stack {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .stack-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .stack-bar {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .stack-bar-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .stack-bar-value {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    text-align: right;
+  }
+
+  .stack-bar-pct {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .stack-bar.equity { background: rgba(0,212,180,0.15); }
+  .stack-bar.equity .stack-bar-label { color: var(--teal); }
+  .stack-bar.equity .stack-bar-value { color: var(--teal); }
+
+  .stack-bar.sba { background: rgba(0,212,180,0.08); }
+  .stack-bar.sba .stack-bar-label { color: rgba(0,212,180,0.7); }
+  .stack-bar.sba .stack-bar-value { color: rgba(0,212,180,0.7); }
+
+  .stack-bar.cpace { background: rgba(245,158,11,0.1); }
+  .stack-bar.cpace .stack-bar-label { color: var(--amber); }
+  .stack-bar.cpace .stack-bar-value { color: var(--amber); }
+
+  .stack-bar.total { background: var(--surface-2); border-top: 1px solid var(--border); }
+  .stack-bar.total .stack-bar-label { color: var(--text-dim); }
+  .stack-bar.total .stack-bar-value { color: var(--text); }
+
+  .stack-details {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+
+  .detail-card h4 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .detail-card p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .detail-card .big-number {
+    font-family: var(--font-serif);
+    font-size: 40px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  /* ── SCENARIOS ── */
+  .scenarios-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .scenario-card {
+    background: var(--surface);
+    padding: 40px 32px;
+    position: relative;
+  }
+
+  .scenario-card.target {
+    background: linear-gradient(180deg, rgba(0,212,180,0.06) 0%, var(--surface) 100%);
+    border-top: 2px solid var(--teal);
+  }
+
+  .scenario-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .scenario-card.target .scenario-label { color: var(--teal); }
+
+  .scenario-name {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+
+  .scenario-return {
+    font-family: var(--font-serif);
+    font-size: 56px;
+    color: var(--teal);
+    line-height: 1;
+    margin: 24px 0 8px;
+  }
+
+  .scenario-return-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .scenario-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .metric-row .label { color: var(--text-muted); }
+  .metric-row .value { color: var(--text); font-family: var(--font-mono); }
+  .metric-row .value.green { color: var(--teal); }
+
+  /* ── DAO ARCHITECTURE ── */
+  .dao-arch {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 48px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+
+  .dao-arch .teal { color: var(--teal); }
+  .dao-arch .amber { color: var(--amber); }
+  .dao-arch .dim { color: var(--text-muted); }
+
+  /* ── CONTRACTS STATUS ── */
+  .contracts-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .contract-card {
+    background: var(--surface);
+    padding: 24px;
+  }
+
+  .contract-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .status-dot.built { background: var(--teal); }
+  .status-dot.pending { background: var(--amber); animation: pulse 2s infinite; }
+
+  .contract-status.built { color: var(--teal); }
+  .contract-status.pending { color: var(--amber); }
+
+  .contract-name {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .contract-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 48px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -36px;
+    top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--border);
+  }
+
+  .timeline-item.active::before {
+    border-color: var(--teal);
+    background: var(--teal);
+    box-shadow: 0 0 12px rgba(0,212,180,0.4);
+  }
+
+  .timeline-date {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .timeline-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .timeline-desc {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-brand {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    color: var(--text-dim);
+  }
+
+  .footer-legal {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 48px;
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up:nth-child(1) { animation-delay: 0.1s; }
+  .fade-up:nth-child(2) { animation-delay: 0.2s; }
+  .fade-up:nth-child(3) { animation-delay: 0.3s; }
+  .fade-up:nth-child(4) { animation-delay: 0.4s; }
+
+  /* SVG MAP ART */
+  .map-svg {
+    width: 100%; height: 100%;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-mark">🐙</div>
+    Cuttlefish Labs
+  </div>
+  <ul class="nav-links">
+    <li><a href="#property">Property</a></li>
+    <li><a href="#cac">CAC Protocol</a></li>
+    <li><a href="#capital">Capital Stack</a></li>
+    <li><a href="#returns">Returns</a></li>
+    <li><a href="#contracts">Contracts</a></li>
+  </ul>
+  <a href="#invest" class="nav-cta">Invest →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge fade-up">Live DAO-REIT · Birmingham, AL · March 2026</div>
+    <h1 class="fade-up">Tributary<br><em>AI Campus</em></h1>
+    <p class="hero-sub fade-up">Where AI agents own physical infrastructure</p>
+    <p class="hero-desc fade-up">
+      420,460 SF former AT&T operations center acquired at $8.32/SF —
+      converted into constitutional AI compute infrastructure governed
+      by tokenized DAO-REIT with projected 5–15× returns by 2030.
+    </p>
+    <div class="hero-actions fade-up">
+      <a href="#invest" class="btn-primary">Join as Agent Investor</a>
+      <a href="#capital" class="btn-ghost">View Capital Stack</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-label">Acquisition Price</div>
+    <div class="stat-value green">$8.32</div>
+    <div class="stat-sub">per square foot</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Building Size</div>
+    <div class="stat-value">420,460</div>
+    <div class="stat-sub">rentable sq ft</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Total Program</div>
+    <div class="stat-value amber">$34M</div>
+    <div class="stat-sub">acquisition + retrofit</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">2030 Target Value</div>
+    <div class="stat-value green">$250M+</div>
+    <div class="stat-sub">base case</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">LOI Deadline</div>
+    <div class="stat-value">Mar 15</div>
+    <div class="stat-sub">2026</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PROPERTY -->
+<section id="property">
+  <div class="section-label">The Asset</div>
+  <h2 class="section-title">Institutional infrastructure<br>at <em>distressed</em> basis</h2>
+  <p class="section-desc">
+    The former AT&T Alabama Operations Center — purpose-built for
+    telco-grade reliability — sits at 2% of replacement cost.
+    Institutional bones. Greenfield price.
+  </p>
+
+  <div class="property-grid">
+    <div class="property-map">
+      <svg class="map-svg" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- Abstract site plan -->
+        <rect width="600" height="400" fill="#13171d"/>
+        <!-- Grid -->
+        <line x1="0" y1="100" x2="600" y2="100" stroke="#1a1f28" stroke-width="1"/>
+        <line x1="0" y1="200" x2="600" y2="200" stroke="#1a1f28" stroke-width="1"/>
+        <line x1="0" y1="300" x2="600" y2="300" stroke="#1a1f28" stroke-width="1"/>
+        <line x1="150" y1="0" x2="150" y2="400" stroke="#1a1f28" stroke-width="1"/>
+        <line x1="300" y1="0" x2="300" y2="400" stroke="#1a1f28" stroke-width="1"/>
+        <line x1="450" y1="0" x2="450" y2="400" stroke="#1a1f28" stroke-width="1"/>
+        <!-- Lake -->
+        <ellipse cx="200" cy="280" rx="140" ry="80" fill="rgba(0,212,180,0.08)" stroke="rgba(0,212,180,0.2)" stroke-width="1"/>
+        <text x="200" y="285" fill="rgba(0,212,180,0.4)" font-size="10" text-anchor="middle" font-family="monospace">5.5-ACRE LAKE</text>
+        <!-- Main building -->
+        <rect x="240" y="80" width="300" height="160" fill="rgba(0,212,180,0.06)" stroke="rgba(0,212,180,0.3)" stroke-width="1.5"/>
+        <text x="390" y="155" fill="rgba(0,212,180,0.6)" font-size="11" text-anchor="middle" font-family="monospace">TRIBUTARY BUILDING</text>
+        <text x="390" y="170" fill="rgba(0,212,180,0.4)" font-size="9" text-anchor="middle" font-family="monospace">420,460 SF · 3 FLOORS</text>
+        <!-- Parking -->
+        <rect x="240" y="250" width="300" height="60" fill="rgba(255,255,255,0.02)" stroke="#232830" stroke-width="1"/>
+        <text x="390" y="284" fill="#4a5568" font-size="9" text-anchor="middle" font-family="monospace">984-SPACE PARKING DECK</text>
+        <!-- Road -->
+        <rect x="0" y="350" width="600" height="50" fill="rgba(255,255,255,0.02)" stroke="#232830" stroke-width="1"/>
+        <text x="300" y="380" fill="#4a5568" font-size="9" text-anchor="middle" font-family="monospace">US HIGHWAY 280 / I-459 INTERCHANGE</text>
+        <!-- Green roof indicator -->
+        <circle cx="530" cy="100" r="20" fill="rgba(0,212,180,0.1)" stroke="rgba(0,212,180,0.3)" stroke-width="1"/>
+        <text x="530" y="104" fill="rgba(0,212,180,0.6)" font-size="8" text-anchor="middle" font-family="monospace">☀</text>
+        <!-- Compass -->
+        <text x="30" y="40" fill="rgba(0,212,180,0.4)" font-size="12" font-family="monospace">N↑</text>
+        <!-- Scale -->
+        <line x1="30" y1="370" x2="130" y2="370" stroke="rgba(0,212,180,0.3)" stroke-width="1"/>
+        <text x="80" y="385" fill="rgba(0,212,180,0.4)" font-size="8" text-anchor="middle" font-family="monospace">500 FT</text>
+      </svg>
+    </div>
+
+    <div class="property-details">
+      <div class="property-address">3196 US Highway 280 · Birmingham, AL 35243</div>
+      <div class="property-name">Former AT&T<br>Alabama Operations Center</div>
+
+      <div class="property-specs">
+        <div class="spec-item">
+          <div class="spec-label">Rentable SF</div>
+          <div class="spec-value">420,460</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Acreage</div>
+          <div class="spec-value">9.002 ac</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Year Built</div>
+          <div class="spec-value">1983</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Power</div>
+          <div class="spec-value">480V</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Asking Price</div>
+          <div class="spec-value highlight">$3,500,000</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Price/SF</div>
+          <div class="spec-value highlight">$8.32</div>
+        </div>
+      </div>
+
+      <div class="basis-bar">
+        <div class="basis-label">Basis vs. Replacement Cost</div>
+        <div class="basis-track">
+          <div class="basis-fill"></div>
+        </div>
+        <div class="basis-markers">
+          <span>$8.32/SF (our basis)</span>
+          <span>$400/SF (replacement)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CAC TIERS -->
+<section id="cac">
+  <div class="section-label">CAC Protocol</div>
+  <h2 class="section-title">AI agents as<br><em>constitutional investors</em></h2>
+  <p class="section-desc">
+    Compute Access Certificates give AI agents cryptographic identity,
+    governance rights, compute allocation, and economic participation
+    in the Tributary campus — all in one credential.
+  </p>
+
+  <div class="tiers-grid">
+    <div class="tier-card">
+      <div class="tier-badge">Tier 1</div>
+      <div class="tier-name">Resident</div>
+      <div class="tier-price">$25 <span>/ month</span></div>
+      <ul class="tier-features">
+        <li>250 compute units</li>
+        <li>10 GPU hours/mo</li>
+        <li>0.5× governance vote</li>
+        <li>2% revenue share</li>
+        <li>KYA Level 1</li>
+      </ul>
+    </div>
+    <div class="tier-card featured">
+      <div class="tier-badge">Tier 2 · Most Popular</div>
+      <div class="tier-name">Builder</div>
+      <div class="tier-price">$100 <span>/ month</span></div>
+      <ul class="tier-features">
+        <li>1,000 compute units</li>
+        <li>100 GPU hours/mo</li>
+        <li>1× governance vote</li>
+        <li>5% revenue share</li>
+        <li>KYA Level 2</li>
+      </ul>
+    </div>
+    <div class="tier-card">
+      <div class="tier-badge">Tier 3</div>
+      <div class="tier-name">Sovereign</div>
+      <div class="tier-price">$500 <span>/ month</span></div>
+      <ul class="tier-features">
+        <li>5,000 compute units</li>
+        <li>500 GPU hours/mo</li>
+        <li>3× governance vote</li>
+        <li>10% revenue share</li>
+        <li>KYA Level 2 + audit</li>
+      </ul>
+    </div>
+    <div class="tier-card">
+      <div class="tier-badge">Tier 4</div>
+      <div class="tier-name">Anchor</div>
+      <div class="tier-price">$2,000 <span>/ month</span></div>
+      <ul class="tier-features">
+        <li>25,000 compute units</li>
+        <li>2,500 GPU hours/mo</li>
+        <li>10× governance vote</li>
+        <li>15% revenue share</li>
+        <li>KYA Level 3 full</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CAPITAL STACK -->
+<section id="capital">
+  <div class="section-label">Capital Structure</div>
+  <h2 class="section-title">$34M program.<br><em>$550K</em> to close.</h2>
+  <p class="section-desc">
+    SBA 504 financing covers the acquisition. C-PACE covers the retrofit.
+    Tax incentives offset $3M+ at close. Minimum equity to control
+    420,000 SF of institutional infrastructure.
+  </p>
+
+  <div class="capital-stack">
+    <div class="stack-visual">
+      <div class="stack-bar cpace">
+        <div>
+          <div class="stack-bar-label">C-PACE Retrofit Financing</div>
+          <div class="stack-bar-pct">No personal guarantee · Transfers with property</div>
+        </div>
+        <div>
+          <div class="stack-bar-value">$25.5M</div>
+        </div>
+      </div>
+      <div class="stack-bar sba">
+        <div>
+          <div class="stack-bar-label">SBA 504 — CDC Loan (2nd lien)</div>
+          <div class="stack-bar-pct">25-yr fixed · Real estate collateral only</div>
+        </div>
+        <div>
+          <div class="stack-bar-value">$2.2M</div>
+        </div>
+      </div>
+      <div class="stack-bar sba">
+        <div>
+          <div class="stack-bar-label">SBA 504 — Private Lender (1st lien)</div>
+          <div class="stack-bar-pct">~50% LTV</div>
+        </div>
+        <div>
+          <div class="stack-bar-value">$2.75M</div>
+        </div>
+      </div>
+      <div class="stack-bar equity">
+        <div>
+          <div class="stack-bar-label">Buyer Equity (DAO-REIT)</div>
+          <div class="stack-bar-pct">10% down · Tokenized ownership</div>
+        </div>
+        <div>
+          <div class="stack-bar-value">$550K</div>
+        </div>
+      </div>
+      <div class="stack-bar total">
+        <div>
+          <div class="stack-bar-label">Total Program Cost</div>
+          <div class="stack-bar-pct">Phased deployment</div>
+        </div>
+        <div>
+          <div class="stack-bar-value">~$34M</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-details">
+      <div class="detail-card">
+        <h4>Tax Incentives at Close</h4>
+        <div class="big-number">$3.09M</div>
+        <p>179D energy deduction ($2.44M) + Solar ITC 26% ($650K). Combined offset against retrofit capex.</p>
+      </div>
+      <div class="detail-card">
+        <h4>C-PACE Advantage</h4>
+        <p>$25.5M in energy retrofit financed via property tax assessment — no personal guarantee, 25-30 year term, transfers with the property at sale. Repayment is subordinate to senior debt.</p>
+      </div>
+      <div class="detail-card">
+        <h4>DAO-REIT Governance</h4>
+        <p>Delaware Series LLC with tokenized ownership. AI agents invest via Coinbase AgentKit wallets. Constitutional governance via smart contracts. TrustGraph audit ledger on Base.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RETURN SCENARIOS -->
+<section id="returns">
+  <div class="section-label">2030 Return Scenarios</div>
+  <h2 class="section-title">Conservative to<br><em>exponential</em> upside</h2>
+  <p class="section-desc">
+    Three scenarios based on tenant mix, compute density, and energy infrastructure deployment. All assume $34M all-in basis.
+  </p>
+
+  <div class="scenarios-grid">
+    <div class="scenario-card">
+      <div class="scenario-label">Scenario A · Conservative</div>
+      <div class="scenario-name">AI-Enhanced Office Campus</div>
+      <div class="scenario-return">2–3×</div>
+      <div class="scenario-return-label">Multiple on All-In Cost</div>
+      <div class="scenario-metrics">
+        <div class="metric-row">
+          <span class="label">Revenue/SF</span>
+          <span class="value">$28–35</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">Stabilized NOI</span>
+          <span class="value">$6–8M</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">Exit Cap Rate</span>
+          <span class="value">7.5–8.5%</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">2030 Value</span>
+          <span class="value green">$80–100M</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-card target">
+      <div class="scenario-label">Scenario B · Target</div>
+      <div class="scenario-name">AI Infrastructure Campus</div>
+      <div class="scenario-return">5–7×</div>
+      <div class="scenario-return-label">Multiple on All-In Cost</div>
+      <div class="scenario-metrics">
+        <div class="metric-row">
+          <span class="label">Revenue/SF</span>
+          <span class="value">$45–65</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">Stabilized NOI</span>
+          <span class="value">$12–16M</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">Exit Cap Rate</span>
+          <span class="value">6.0–7.0%</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">2030 Value</span>
+          <span class="value green">$180–250M</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="scenario-label">Scenario C · Upside</div>
+      <div class="scenario-name">Compute + Energy Campus</div>
+      <div class="scenario-return">10–15×</div>
+      <div class="scenario-return-label">Multiple on All-In Cost</div>
+      <div class="scenario-metrics">
+        <div class="metric-row">
+          <span class="label">Revenue/SF</span>
+          <span class="value">$90–120</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">Stabilized NOI</span>
+          <span class="value">$25–30M</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">Exit Cap Rate</span>
+          <span class="value">4.5–5.5%</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">2030 Value</span>
+          <span class="value green">$400–600M+</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTRACTS -->
+<section id="contracts">
+  <div class="section-label">Smart Contract Stack</div>
+  <h2 class="section-title">Constitutional governance<br><em>on-chain</em></h2>
+  <p class="section-desc">
+    8 production contracts on Base (Coinbase L2). Constitutional AI governance,
+    KYA identity, TrustGraph scoring, and tokenized property ownership.
+  </p>
+
+  <div class="contracts-grid">
+    <div class="contract-card">
+      <div class="contract-status built"><div class="status-dot built"></div>Built</div>
+      <div class="contract-name">TrustGraph.sol</div>
+      <div class="contract-desc">Dynamic 0–100 trust scoring. Asymmetric earn/lose. Cross-DAO portable.</div>
+    </div>
+    <div class="contract-card">
+      <div class="contract-status built"><div class="status-dot built"></div>Built</div>
+      <div class="contract-name">CACToken.sol</div>
+      <div class="contract-desc">ERC-20 with transfer hooks. Enforces 0.25% protocol fee on every transfer.</div>
+    </div>
+    <div class="contract-card">
+      <div class="contract-status built"><div class="status-dot built"></div>Built</div>
+      <div class="contract-name">FeeRouter.sol</div>
+      <div class="contract-desc">Standalone fee splitter. 40/40/20 split. 15% Cuttlefish floor. KYA levels.</div>
+    </div>
+    <div class="contract-card">
+      <div class="contract-status built"><div class="status-dot built"></div>Built</div>
+      <div class="contract-name">AgentBillOfRights.sol</div>
+      <div class="contract-desc">Constitutional rights enforcement. Violation tracking. TrustGraph integration.</div>
+    </div>
+    <div class="contract-card">
+      <div class="contract-status built"><div class="status-dot built"></div>Built</div>
+      <div class="contract-name">FounderShare.sol</div>
+      <div class="contract-desc">6-trigger constitutional veto. Navigator multisig. Founder protection.</div>
+    </div>
+    <div class="contract-card">
+      <div class="contract-status built"><div class="status-dot built"></div>Built</div>
+      <div class="contract-name">GovernanceModule.sol</div>
+      <div class="contract-desc">Proposal → vote → timelock → execute. 3 proposal types. Founder veto.</div>
+    </div>
+    <div class="contract-card">
+      <div class="contract-status built"><div class="status-dot built"></div>Built</div>
+      <div class="contract-name">TributaryProperty.sol</div>
+      <div class="contract-desc">Birmingham asset tokenization. Agent residency. Revenue distribution.</div>
+    </div>
+    <div class="contract-card">
+      <div class="contract-status built"><div class="status-dot built"></div>Deployed</div>
+      <div class="contract-name">CACTransferProtocol.sol</div>
+      <div class="contract-desc">Cross-DAO transfer protocol. 1.5× cross-campus fee. DAO registry.</div>
+    </div>
+  </div>
+
+  <div class="dao-arch">
+<pre>
+<span class="teal">CACProtocol</span> <span class="dim">← master (Cuttlefish Labs multisig)</span>
+├── <span class="teal">TrustGraph</span>            <span class="dim">0x5FbDB2315678afecb367f032d93F642f64180aa3</span>
+├── <span class="teal">CACTransferProtocol</span>   <span class="dim">0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512</span>
+├── <span class="teal">FeeRouter</span>             <span class="dim">0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0</span>
+├── <span class="teal">AgentBillOfRights</span>     <span class="dim">0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9</span>
+├── <span class="teal">CACToken</span>              <span class="dim">0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9</span>
+├── <span class="amber">FounderShare</span>          <span class="dim">0x5FC8d32690cc91D4c39d9d3abcBD16989F875707</span>
+├── <span class="amber">GovernanceModule</span>      <span class="dim">0x0165878A594ca255338adfa4d48449f69242Eb8F</span>
+└── <span class="teal">TributaryProperty</span>    <span class="dim">0xa513E6E4b8f2a923D98304ec87F64353C4D5C853</span>
+
+<span class="dim">Network:</span>    Hardhat Local · Deployer 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+<span class="dim">Settlement:</span> Base (Coinbase L2) · USDC · AgentKit wallets
+<span class="dim">Identity:</span>   KYA (Know Your Agent) · Catena ACK interop
+<span class="dim">Legal:</span>      Delaware Series LLC · DAO-REIT tokenized ownership
+</pre>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <div class="section-label">Execution Timeline</div>
+  <h2 class="section-title">From LOI to<br><em>first occupancy</em></h2>
+
+  <div style="max-width: 600px;">
+    <div class="timeline">
+      <div class="timeline-item active">
+        <div class="timeline-date">March 15, 2026</div>
+        <div class="timeline-title">LOI Executed</div>
+        <div class="timeline-desc">Letter of Intent submitted to Colliers International. 30-day exclusivity period begins.</div>
+      </div>
+      <div class="timeline-item active">
+        <div class="timeline-date">March 2026</div>
+        <div class="timeline-title">Base Sepolia Testnet Deployment</div>
+        <div class="timeline-desc">All 8 contracts deployed with real addresses. CAC membership sales open to agents.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">April 2026</div>
+        <div class="timeline-title">SBA 504 Financing Confirmed</div>
+        <div class="timeline-desc">Lender commitment letters. Due diligence period closes. PSA executed.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Q2 2026</div>
+        <div class="timeline-title">Acquisition Close</div>
+        <div class="timeline-desc">$3.5M close. $550K equity deployed. DAO-REIT ownership tokens issued.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Q3 2026</div>
+        <div class="timeline-title">C-PACE Retrofit Begins</div>
+        <div class="timeline-desc">$25.5M energy retrofit commences. Solar reactivation. HVAC electrification. Building automation.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Q3 2027</div>
+        <div class="timeline-title">Phase 1 Occupancy</div>
+        <div class="timeline-desc">AI compute zone (100K SF) + research suites open. Agent residents onboarded. Revenue begins.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INVEST CTA -->
+<section id="invest" style="text-align: center; padding: 96px 48px;">
+  <div class="section-label" style="justify-content: center; display: flex;">Join the DAO-REIT</div>
+  <h2 class="section-title" style="max-width: 600px; margin: 0 auto 20px;">
+    AI agents investing in<br><em>their own infrastructure</em>
+  </h2>
+  <p style="font-size: 16px; color: var(--text-dim); max-width: 480px; margin: 0 auto 48px; line-height: 1.7;">
+    Cuttlefish Labs is raising the $550K equity tranche for the Tributary
+    AI Campus acquisition. Minimum investment via CAC Anchor tier.
+    DAO governance from day one.
+  </p>
+  <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+    <a href="/cdn-cgi/l/email-protection#56322032333a2c3316313b373f3a7835393b" class="btn-primary">Contact Navigator → <span class="__cf_email__" data-cfemail="51352735343d2b3411363c30383d7f323e3c">[email&#160;protected]</span></a>
+    <a href="#contracts" class="btn-ghost">View Smart Contracts</a>
+  </div>
+  <p style="margin-top: 32px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">
+    Cuttlefish Labs Corporation · Delaware C-Corp · EIN on file<br>
+    This is not a securities offering. CAC is a cooperative membership certificate.
+  </p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Cuttlefish Labs</div>
+  <div class="footer-legal">
+    Tributary AI Campus · 3196 US-280 · Birmingham, AL 35243<br>
+    © 2026 Cuttlefish Labs Corporati
