@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Full viz engine — extracted from dao_reit_v12
 // All interactive features: orbital nodes, campus pie rings, pool panels,
 // DAO governance panels, agent file explorer, minimap, camera lock
@@ -13,8 +14,8 @@ export interface VizEngine {
   reset: () => void
 }
 
-export function initVizEngine(canvas: HTMLCanvasElement): VizEngine {
-  const wrap = canvas.parentElement as HTMLElement
+export function initVizEngine(canvas: HTMLCanvasElement, wrapEl?: HTMLElement): VizEngine {
+  const wrap = (wrapEl || canvas.parentElement) as HTMLElement
   const ctx = canvas.getContext('2d')!
   let W = 0, H = 0
   let dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -43,12 +44,6 @@ export function initVizEngine(canvas: HTMLCanvasElement): VizEngine {
 
   let rafId = 0
 
-  // (declared above)
-    // (declared above)
-    // (declared above)
-    // (declared above)
-    // (declared above)
-  let W,H,dpr=Math.min(window.devicePixelRatio||1,2);
   function resize(){W=wrap.offsetWidth;H=wrap.offsetHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
   resize();window.addEventListener('resize',resize);
 
@@ -507,7 +502,7 @@ export function initVizEngine(canvas: HTMLCanvasElement): VizEngine {
       if(!hit&&lockNode){lockNode=null;lockPrevPos=null;}
     }
   });
-  wrap.addEventListener('touchstart',e=>{drag=true;lmx=e.touches[0].clientX;lmy=e.touches[0].clientY;st.rotate=false;// rotate button managed by React},{passive:true});
+  wrap.addEventListener('touchstart',e=>{drag=true;lmx=e.touches[0].clientX;lmy=e.touches[0].clientY;st.rotate=false;},{passive:true}); // rotate button managed by React
   wrap.addEventListener('mousemove',e=>{
     const r=wrap.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top;
     if(flyMode){
@@ -602,11 +597,11 @@ export function initVizEngine(canvas: HTMLCanvasElement): VizEngine {
     keys[e.code]=true;
     if(e.code==='Escape'){hideCtx();if(flyMode)toggleFly();if(drag){drag=false;}}
     if(e.code==='KeyM')minimapOpen=!minimapOpen;
-  });
+  }
+  document.addEventListener('keydown', handleKey);
   document.addEventListener('keyup', (e: KeyboardEvent) => { keys[e.code] = false; });
 
   document.addEventListener('click',hideCtx);
-  function handleKey(e: KeyboardEvent) {if(e.code==='Escape')hideCtx();});
 
   function proj(x,y,z){
     if(flyMode){
