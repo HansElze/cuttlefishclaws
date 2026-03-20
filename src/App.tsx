@@ -1,205 +1,123 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Agent, ChatMessage as ChatMsg, Session, AGENTS } from './types';
-import { connect, disconnect, subscribe, request, isConnected } from './gateway';
-import AgentCard from './components/AgentCard';
-import SessionList from './components/SessionList';
-import ChatPanel from './components/ChatPanel';
-import QuickActions from './components/QuickActions';
-import SettingsModal from './components/SettingsModal';
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import Nav from './components/Nav'
+import Hero from './components/Hero'
+import CACSection from './components/sections/CACSection'
+import AgentsSection from './components/sections/AgentsSection'
+import CapitalStack from './components/sections/CapitalStack'
+import ContractsSection from './components/sections/ContractsSection'
+import ReturnsSection from './components/sections/ReturnsSection'
+import InvestSection from './components/sections/InvestSection'
+import Footer from './components/Footer'
+import AgentChatModal from './components/agents/AgentChatModal'
+import { usePalette } from './hooks/usePalette'
+import { useScrollReveal } from './hooks/useScrollReveal'
 
-export default function App() {
-  const [agents, setAgents] = useState<Agent[]>(() =>
-    AGENTS.map(a => ({ ...a, online: false, activeSessions: 0 }))
-  );
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [chatHistory, setChatHistory] = useState<Record<string, ChatMsg[]>>({});
-  const [streamingId, setStreamingId] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState('disconnected');
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const _streamingRef = useRef<string | null>(null);
+function App() {
+  const location = useLocation()
+  const { palette, togglePalette } = usePalette()
+  const [chatAgent, setChatAgent] = useState<string | null>(null)
+  const [showReturns, setShowReturns] = useState(false)
+  const [returnsUnlocked, setReturnsUnlocked] = useState(false)
 
-  const selectedAgent = agents.find(a => a.id === selectedAgentId) || null;
-  const currentMessages = selectedAgent ? (chatHistory[selectedAgent.sessionKey] || []) : [];
+  useScrollReveal()
 
-  const fetchSessions = useCallback(async () => {
-    if (!isConnected()) return;
-    try {
-      const res = await request('sessions.list', {}) as { sessions?: Session[] } | Session[];
-      const list: Session[] = Array.isArray(res) ? res : (res as { sessions?: Session[] }).sessions || [];
-      setSessions(list);
-
-      setAgents(prev => prev.map(a => {
-        const agentSessions = list.filter(s => s.key?.startsWith(`agent:${a.id}:`));
-        return { ...a, online: agentSessions.length > 0, activeSessions: agentSessions.length };
-      }));
-    } catch { /* ignore */ }
-  }, []);
-
+  // Check for /vc route or session storage
   useEffect(() => {
-    connect();
-    const unsub = subscribe((msg) => {
-      const ev = msg as { type: string; event?: string; payload?: Record<string, unknown> };
-
-      if (ev.event === 'connection.status') {
-        const status = (ev.payload as { status: string })?.status || 'unknown';
-        setConnectionStatus(status);
-        if (status === 'connected') fetchSessions();
-      }
-
-      // Handle real-time chat streaming events from gateway
-      if (ev.event === 'chat') {
-        const p = ev.payload as { sessionKey?: string; state?: string; message?: { role: string; content: Array<{ type: string; text?: string }> } };
-        if (!p.sessionKey || !p.message || p.message.role !== 'assistant') return;
-
-        const text = p.message.content?.filter(c => c.type === 'text').map(c => c.text || '').join('') || '';
-        if (!text) return;
-
-        setChatHistory(prev => {
-          const updated = { ...prev };
-          const msgs = [...(updated[p.sessionKey!] || [])];
-          const last = msgs[msgs.length - 1];
-          if (last && last.streaming) {
-            msgs[msgs.length - 1] = {
-              ...last,
-              content: text,
-              streaming: p.state !== 'final',
-            };
-            updated[p.sessionKey!] = msgs;
-          }
-          return updated;
-        });
-
-        if (p.state === 'final') {
-          setStreamingId(null);
-          _streamingRef.current = null;
-        }
-      }
-    });
-
-    const interval = setInterval(fetchSessions, 15000);
-    return () => { unsub(); clearInterval(interval); disconnect(); };
-  }, [fetchSessions]);
-
-  const handleNewMessage = useCallback((msg: ChatMsg) => {
-    if (!selectedAgent) return;
-    const key = selectedAgent.sessionKey;
-    if (msg.streaming) {
-      setStreamingId(msg.id);
-      _streamingRef.current = msg.id;
+    if (location.pathname === '/vc' || location.hash === '#vc') {
+      setShowReturns(true)
     }
-    setChatHistory(prev => ({
-      ...prev,
-      [key]: [...(prev[key] || []), msg],
-    }));
-  }, [selectedAgent]);
-
-  const handleUpdateStreaming = useCallback((id: string, content: string, done: boolean) => {
-    setChatHistory(prev => {
-      const updated = { ...prev };
-      for (const key of Object.keys(updated)) {
-        updated[key] = updated[key].map(m =>
-          m.id === id ? { ...m, content, streaming: !done } : m
-        );
-      }
-      return updated;
-    });
-    if (done) { setStreamingId(null); _streamingRef.current = null; }
-  }, []);
-
-  const handleAssignTask = (agent: Agent) => setSelectedAgentId(agent.id);
-
-  const handleCheckMemory = async (agent: Agent) => {
-    setSelectedAgentId(agent.id);
-    const userMsg: ChatMsg = { id: `user-${Date.now()}`, role: 'user', content: 'read MEMORY.md', timestamp: Date.now() };
-    const assistantMsg: ChatMsg = { id: `assistant-${Date.now()}`, role: 'assistant', content: '', timestamp: Date.now(), streaming: true };
-    const key = agent.sessionKey;
-    setChatHistory(prev => ({ ...prev, [key]: [...(prev[key] || []), userMsg, assistantMsg] }));
-    setStreamingId(assistantMsg.id);
-    try {
-      const result = await request('agent', {
-        message: 'read MEMORY.md',
-        sessionKey: agent.sessionKey,
-        idempotencyKey: `dk-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        deliver: false,
-        channel: 'webchat',
-      });
-      const res = result as { result?: { payloads?: Array<{ text?: string }> } };
-      const finalText = res?.result?.payloads?.map(p => p.text).filter(Boolean).join('\n');
-      if (finalText) handleUpdateStreaming(assistantMsg.id, finalText, true);
-    } catch (e) {
-      handleUpdateStreaming(assistantMsg.id, `Error: ${e}`, true);
+    if (sessionStorage.getItem('vc_access') === '1') {
+      setShowReturns(true)
+      setReturnsUnlocked(true)
     }
-  };
+  }, [location])
 
-  const handleRestartGateway = async () => {
-    try {
-      await request('status', {});
-      alert('Gateway is running and connected.');
-    } catch {
-      alert('Gateway unreachable');
+  const handleVCAccess = (code: string) => {
+    if (code.toUpperCase() === import.meta.env.VITE_VC_CODE || code.toUpperCase() === 'TRIBUTARY2026') {
+      sessionStorage.setItem('vc_access', '1')
+      setReturnsUnlocked(true)
+      return true
     }
-  };
+    return false
+  }
 
-  const handleSessionSelect = (sessionKey: string) => {
-    const agentMatch = sessionKey.match(/^agent:(\w+):/);
-    if (agentMatch) setSelectedAgentId(agentMatch[1]);
-  };
+  const handleLockReturns = () => {
+    sessionStorage.removeItem('vc_access')
+    setReturnsUnlocked(false)
+  }
+
+  const scrollTo = (id: string) => {
+    if (id === 'returns') {
+      setShowReturns(true)
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="header-left">
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="logo-emoji">🐙</span>
-              <span className="logo">Cuttlefish Claws</span>
-            </div>
-            <div className="header-subtitle">Builder Agent Swarm Dashboard</div>
-          </div>
-          <span className={`connection-badge ${connectionStatus}`}>{connectionStatus}</span>
-        </div>
-        <button className="btn btn-sm" onClick={() => setSettingsOpen(true)}>⚙️</button>
-      </header>
-
-      <div className="app-body">
-        <aside className="sidebar">
-          <h3 className="section-title">Agents</h3>
-          <div className="agent-list">
-            {agents.map(a => (
-              <AgentCard
-                key={a.id}
-                agent={a}
-                selected={selectedAgentId === a.id}
-                onSelect={() => setSelectedAgentId(a.id)}
-              />
-            ))}
-          </div>
-          <SessionList sessions={sessions} onSelect={handleSessionSelect} />
-        </aside>
-
-        <main className="main-area">
-          <ChatPanel
-            agent={selectedAgent}
-            messages={currentMessages}
-            onNewMessage={handleNewMessage}
-            onUpdateStreaming={handleUpdateStreaming}
-            streamingId={streamingId}
+    <div className="min-h-screen">
+      <div className="scanline" />
+      
+      <Nav 
+        scrollTo={scrollTo} 
+        palette={palette} 
+        togglePalette={togglePalette} 
+      />
+      
+      <Hero 
+        scrollTo={scrollTo}
+        palette={palette}
+        togglePalette={togglePalette}
+      />
+      
+      <hr className="section-divider" />
+      
+      <CACSection />
+      
+      <hr className="section-divider" />
+      
+      <AgentsSection onOpenChat={setChatAgent} />
+      
+      <hr className="section-divider" />
+      
+      <CapitalStack />
+      
+      {showReturns && (
+        <>
+          <hr className="section-divider" />
+          <ReturnsSection 
+            unlocked={returnsUnlocked}
+            onUnlock={handleVCAccess}
+            onLock={handleLockReturns}
           />
-        </main>
-
-        <aside className="right-panel">
-          <QuickActions
-            agents={agents}
-            onAssignTask={handleAssignTask}
-            onCheckMemory={handleCheckMemory}
-            onRestartGateway={handleRestartGateway}
-            onOpenSettings={() => setSettingsOpen(true)}
-          />
-        </aside>
-      </div>
-
-      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+        </>
+      )}
+      
+      <hr className="section-divider" />
+      
+      <ContractsSection />
+      
+      <hr className="section-divider" />
+      
+      <InvestSection 
+        scrollTo={scrollTo}
+        onShowReturns={() => setShowReturns(true)}
+      />
+      
+      <Footer />
+      
+      {chatAgent && (
+        <AgentChatModal 
+          agentId={chatAgent} 
+          onClose={() => setChatAgent(null)} 
+        />
+      )}
     </div>
-  );
+  )
 }
+
+export default App

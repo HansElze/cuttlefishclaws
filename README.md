@@ -1,63 +1,35 @@
-# Cuttlefish Labs - Infrastructure DAO Landing Page
+# https-github.com-HansElze-cuttlefishclaws
 
-A professional landing page for Cuttlefish Labs Infrastructure DAO, built with React, TypeScript, and Tailwind CSS.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
 
-## Features
+## Built with v0
 
-- **Modern Design**: Professional gradient themes and animations
-- **Responsive Layout**: Works perfectly on all devices
-- **Interactive Navigation**: Smooth scrolling between sections
-- **Subscription Form**: Newsletter signup with Netlify Forms integration
-- **Professional Content**: Complete company information and roadmap
+This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
 
-## Sections
+[Continue working on v0 →](https://v0.app/chat/projects/prj_X5RXGolu2KC4OpfoSSGLZxkGWtXm)
 
-- Hero section with compelling messaging
-- About section explaining AI infrastructure challenges
-- Why Now section with market timing
-- Whitepaper section with subscription form
-- Token sale information and timeline
-- Team and advisors information
-- Partners and ecosystem overview
-- Community links and contact information
+## Getting Started
 
-## Deployment
-
-### Netlify (Recommended)
-
-1. Connect your repository to Netlify
-2. Build command: `npm run build`
-3. Publish directory: `dist`
-4. The site will automatically deploy with Netlify Forms enabled
-
-### Local Development
+First, run the development server:
 
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
 npm run dev
-
-# Build for production
-npm run build
+# or
+yarn dev
+# or
+pnpm dev
 ```
 
-## Technology Stack
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-- **Frontend**: React 18, TypeScript
-- **Styling**: Tailwind CSS with custom themes
-- **UI Components**: Radix UI + shadcn/ui
-- **Build Tool**: Vite
-- **Forms**: Netlify Forms integration
-- **Icons**: Lucide React
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Environment
+## Learn More
 
-- Node.js 18+ required
-- Built for static deployment on Netlify
-- No backend dependencies in production
+To learn more, take a look at the following resources:
 
-## Contact
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
 
-Built for Cuttlefish Labs Infrastructure DAO - building the future of decentralized AI infrastructure.
+<a href="https://v0.app/chat/api/kiro/clone/HansElze/https-github.com-HansElze-cuttlefishclaws" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
