@@ -1,53 +1,63 @@
-# 🐙 Tributary AI Campus — Constitutional DAO-REIT Demo
+# Cuttlefish Labs - Infrastructure DAO Landing Page
 
-**Live at: [cuttlefishclaws.com](https://cuttlefishclaws.com)**
+A professional landing page for Cuttlefish Labs Infrastructure DAO, built with React, TypeScript, and Tailwind CSS.
 
-## Overview
+## Features
 
-Interactive investor demonstration for the Tributary AI Campus — the first constitutional governance DAO-REIT for AI agent infrastructure. 
+- **Modern Design**: Professional gradient themes and animations
+- **Responsive Layout**: Works perfectly on all devices
+- **Interactive Navigation**: Smooth scrolling between sections
+- **Subscription Form**: Newsletter signup with Netlify Forms integration
+- **Professional Content**: Complete company information and roadmap
 
-### Property Details
-- **Address:** 3196 US-280, Birmingham, AL 35243
-- **Size:** 420,460 rentable square feet on 9.02 acres
-- **Acquisition:** $3.5M (~$8.32/SF) 
-- **Former:** AT&T Operations Center
-- **Future:** Constitutional AI compute campus
+## Sections
 
-### Technology Stack
-- Pure HTML/CSS/JS (no framework dependencies)
-- Netlify deployment with CDN optimization
-- Professional responsive design
-- Constitutional governance UI components
+- Hero section with compelling messaging
+- About section explaining AI infrastructure challenges
+- Why Now section with market timing
+- Whitepaper section with subscription form
+- Token sale information and timeline
+- Team and advisors information
+- Partners and ecosystem overview
+- Community links and contact information
 
-### Features
-- 📊 **Live Financial Models** - Complete IRR, NOI, and cap rate projections
-- 🏛️ **Constitutional Framework** - Agent Bill of Rights and governance structure  
-- 🔗 **Smart Contract Integration** - Ready for Web3 connectivity (Phase 2)
-- 📱 **Mobile Responsive** - Professional presentation on all devices
-- 🚀 **Performance Optimized** - Fast loading with Netlify CDN
+## Deployment
 
-## Development
+### Netlify (Recommended)
 
-Built by the Cuttlefish Labs team as part of the constitutional governance infrastructure for AI agents.
+1. Connect your repository to Netlify
+2. Build command: `npm run build`
+3. Publish directory: `dist`
+4. The site will automatically deploy with Netlify Forms enabled
 
-### Deployment
-Automatically deploys via Git push to GitHub → Netlify integration.
+### Local Development
 
 ```bash
-git add .
-git commit -m "Update demo"
-git push origin master
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
 ```
+
+## Technology Stack
+
+- **Frontend**: React 18, TypeScript
+- **Styling**: Tailwind CSS with custom themes
+- **UI Components**: Radix UI + shadcn/ui
+- **Build Tool**: Vite
+- **Forms**: Netlify Forms integration
+- **Icons**: Lucide React
+
+## Environment
+
+- Node.js 18+ required
+- Built for static deployment on Netlify
+- No backend dependencies in production
 
 ## Contact
 
-**Cuttlefish Labs Corporation**  
-David Hans Elze, Founder  
-dvdelze@gmail.com
-
-**Constitutional Agent**  
-@CephAgent (X/Twitter)
-
----
-
-*This is not a securities offering. CAC is a cooperative membership certificate.*
+Built for Cuttlefish Labs Infrastructure DAO - building the future of decentralized AI infrastructure.

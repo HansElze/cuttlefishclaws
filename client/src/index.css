@@ -1,0 +1,206 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Cuttlefish Bioluminescent / Infra-TRON Theme */
+  --abyss-black: #05080C;
+  --deep-ocean-navy: #071826;
+  --biolume-cyan: #00E5FF;
+  --electric-teal: #00FFC8;
+  --ion-blue: #1FB6FF;
+  --cold-white-glow: rgba(200, 255, 255, 0.9);
+  --steel-gray: #8FA3B0;
+
+  /* Global Defaults */
+  --body-bg: var(--abyss-black);
+  --text-primary: var(--cold-white-glow);
+  --text-secondary: var(--steel-gray);
+}
+
+body {
+  background-color: var(--body-bg);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Typography Styles */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--biolume-cyan);
+  text-shadow: 0 0 4px rgba(0, 229, 255, 0.2);
+}
+
+p, .body-text {
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+/* Button Styles - Primary CTA with Energy Leakage Glow */
+.btn-primary {
+  background: linear-gradient(180deg, rgba(0, 255, 200, 0.15), rgba(0, 229, 255, 0.05));
+  border: 1px solid rgba(0, 229, 255, 0.6);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.25), inset 0 0 12px rgba(0, 255, 200, 0.15);
+}
+
+.btn-primary:hover, button[class*="gradient"]:hover, .gradient-button:hover {
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.45), inset 0 0 18px rgba(0, 255, 200, 0.25);
+}
+
+.btn-primary:active, button[class*="gradient"]:active, .gradient-button:active {
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.6), inset 0 0 24px rgba(0, 255, 200, 0.35);
+}
+
+.dark {
+  --background: 222 84% 5%;
+  --foreground: 0 0% 100%;
+  --muted: 217 32% 17%;
+  --muted-foreground: 215 20% 65%;
+  --popover: 222 84% 5%;
+  --popover-foreground: 0 0% 100%;
+  --card: 222 84% 5%;
+  --card-foreground: 0 0% 100%;
+  --border: 217 32% 17%;
+  --input: 217 32% 17%;
+  --primary: 195 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 222 47% 11%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 217 32% 17%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 195 100% 50%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .glass-effect {
+    background: rgba(7, 24, 38, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 229, 255, 0.15);
+  }
+
+  .gradient-text {
+    color: var(--biolume-cyan);
+    text-shadow: 0 0 6px rgba(0, 229, 255, 0.25);
+  }
+
+  .gradient-button {
+    background: linear-gradient(180deg, rgba(0, 255, 200, 0.15), rgba(0, 229, 255, 0.05));
+    border: 1px solid rgba(0, 229, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.25), inset 0 0 12px rgba(0, 255, 200, 0.15);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(0, 255, 200, 0.6);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+/* Secondary Button - Minimal Structural Style */
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--steel-gray);
+  color: var(--text-secondary);
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  border-color: rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+  color: var(--biolume-cyan);
+}
+
+/* Hero Section with Radial Gradient */
+.hero-section, section:first-child {
+  background: radial-gradient(1200px circle at 50% 0%, rgba(0, 229, 255, 0.15), var(--abyss-black) 70%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Section Dividers - Bioluminescent Nerve Lines */
+.section-divider, hr {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.8), transparent);
+  margin: 40px 0;
+  border: none;
+}
+
+/* Cards/Modules - Deep Ocean Styling */
+.card {
+  background: rgba(7, 24, 38, 0.8);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);
+  border-color: rgba(0, 229, 255, 0.4);
+}

@@ -1,0 +1,232 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="title" content="Cuttlefish Labs | Decentralized AI Infrastructure DAO">
+  <meta name="description" content="Join Cuttlefish Labs — building the world’s first Infrastructure DAO for sovereign AI data clusters. Decentralized, community-governed, and powered by tokenized assets.">
+  <title>Cuttlefish Labs</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #0a0a23; color: #fff; }
+    header { background: linear-gradient(90deg, #1e3a8a, #9333ea); padding: 50px; text-align: center; }
+    section { padding: 40px; max-width: 1200px; margin: auto; }
+    h1 { font-size: 2.5em; }
+    h2 { font-size: 1.8em; }
+    .cta { background: #9333ea; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+    .cta:hover { background: #7e22ce; }
+    .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    .table th, .table td { border: 1px solid #fff; padding: 10px; text-align: left; }
+    footer { background: #1e3a8a; padding: 20px; text-align: center; }
+    form { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: auto; }
+    input, select { padding: 10px; border-radius: 5px; border: none; }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cuttlefish Labs: Powering the Future of AI with Decentralized Infrastructure</h1>
+    <p>Join the first Infrastructure DAO to build scalable, community-owned AI data clusters, revolutionizing how artificial intelligence scales globally.</p>
+    <p>The world’s AI revolution demands unprecedented computing power, but centralized data centers are costly, inefficient, and controlled by a few. Cuttlefish Labs is changing that. We’re building decentralized AI data clusters on resource-rich land in the Permian Basin, powered by renewable energy and managed by a community-driven DAO. Our mission is to democratize AI infrastructure, enabling innovators, businesses, and communities to access scalable, sustainable computing power. By combining cutting-edge AI planning tools with blockchain governance, we’re creating a transparent, equitable ecosystem where token holders shape the future. No working product yet—but our vision is bold, our roadmap is clear, and our team is ready. Join us to invest in the infrastructure powering tomorrow’s AI breakthroughs.</p>
+    <a href="#whitepaper" class="cta">Read the White Paper</a>
+    <a href="#community" class="cta">Join the Community</a>
+    <a href="#about" class="cta">Learn More</a>
+  </header>
+
+  <section id="about">
+    <h2>Why Cuttlefish Labs?</h2>
+    <p>The AI industry is booming, projected to reach $500 billion by 2025, but its growth is bottlenecked by centralized infrastructure. Traditional data centers are expensive, energy-intensive, and controlled by a handful of corporations, limiting access for innovators and communities. Cuttlefish Labs solves this with a decentralized approach. We’re building AI data clusters on resource-rich land in the Permian Basin, leveraging abundant natural gas and renewable energy sources like solar and wind. Our infrastructure DAO empowers token holders to govern key decisions—from site selection to cluster scaling—ensuring transparency and community ownership.</p>
+    <p>Our proprietary Cuttlefish AI tools optimize every stage of development, from permitting to resource allocation, reducing costs and environmental impact. By integrating blockchain technology, we enable tokenized assets for land, energy, and computing power, creating new investment opportunities. Our vision aligns with the Smart Infrastructure Expansion Act of 2025, tapping into federal incentives to accelerate growth. While we’re in the early stages, our roadmap outlines clear milestones: a prototype by Q3 2026, token sale in Q1 2026, and first clusters operational by 2027. Join us to redefine AI infrastructure for a sustainable, inclusive future.</p>
+    <a href="#whitepaper" class="cta">Discover Our Vision</a>
+  </section>
+
+  <section id="why-now">
+    <h2>Why Now?</h2>
+    <p>The world is facing a massive infrastructure gap in AI compute:</p>
+    <ul>
+      <li><strong>GPU shortage</strong>: Demand for AI processing power far outstrips supply.</li>
+      <li><strong>Hyperscaler control</strong>: Centralized data centers limit innovation and access.</li>
+      <li><strong>Sovereign compute</strong>: National security demands independent AI infrastructure.</li>
+      <li><strong>RWA tokenization</strong>: Regulators and investors are embracing real-world asset tokenization.</li>
+      <li><strong>DePIN explosion</strong>: Billions in capital are flowing into Decentralized Physical Infrastructure Networks.</li>
+    </ul>
+    <p>Cuttlefish Labs is the first Infrastructure DAO dedicated to sovereign AI compute. We are perfectly positioned to capture this wave—with land assets, a clear roadmap, and a community-first approach.</p>
+    <a href="#token-sale" class="cta">Invest in the Future</a>
+  </section>
+
+  <section id="whitepaper">
+    <h2>Cuttlefish Labs White Paper</h2>
+    <p>Our white paper outlines the technical, economic, and governance framework for Cuttlefish Labs’ Infrastructure DAO. Learn how we’re building decentralized AI data clusters with cutting-edge AI planning tools, powered by renewable energy and governed by token holders. The document details our tokenomics, roadmap, and use of funds, offering a transparent view of our vision to democratize AI infrastructure. While we’re pre-product, our plan leverages strategic land assets, federal incentives, and blockchain technology to create a scalable, community-driven ecosystem. Download now to explore how Cuttlefish Labs will power the AI revolution.</p>
+    <a href="cuttlefishlabs-whitepaper.pdf" class="cta">Download White Paper</a>
+    <form id="subscribe-whitepaper">
+      <h3>Stay Updated</h3>
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="interest" value="investing"> Investing</label>
+        <label><input type="checkbox" name="interest" value="building"> Building</label>
+        <label><input type="checkbox" name="interest" value="advising"> Advising</label>
+        <label><input type="checkbox" name="interest" value="updates"> General Updates</label>
+      </div>
+      <button type="submit" class="cta">Subscribe</button>
+    </form>
+  </section>
+
+  <section id="token-sale">
+    <h2>Invest in the Future of AI Infrastructure</h2>
+    <p>The Cuttlefish Labs token sale is your opportunity to own a stake in the first Infrastructure DAO powering AI data clusters. Our tokens grant governance rights, allowing you to vote on key decisions like cluster locations and partnerships. As our network grows, token holders may benefit from revenue sharing as hyperscalers lease computing power. The token sale is planned for Q1 2026, with early supporters receiving exclusive perks, such as bonus tokens or priority access to governance proposals.</p>
+    <p>Funds raised will accelerate development: building AI planning tools, securing land in the Permian Basin, and deploying sustainable energy solutions like floating solar arrays. With a projected $125M funding goal (including grants and private investment), we’re poised to deliver operational clusters by 2027. Join a community of innovators and investors shaping the AI revolution. Stay tuned for sale details, including token price and distribution.</p>
+    <table class="table">
+      <tr><th>Item</th><th>Details</th></tr>
+      <tr><td>Token Sale Date</td><td>Q1 2026 (TBD)</td></tr>
+      <tr><td>Token Utility</td><td>Governance, potential revenue sharing</td></tr>
+      <tr><td>Total Supply</td><td>1B tokens (TBD)</td></tr>
+      <tr><td>Distribution</td><td>40% community, 20% team, 20% investors, 20% reserve</td></tr>
+      <tr><td>Early Investor Perks</td><td>10% bonus tokens (TBD)</td></tr>
+    </table>
+    <p><em>Investing in tokens involves risks. Please consult financial advisors and review our terms before participating.</em></p>
+    <a href="#subscribe-whitepaper" class="cta">Sign Up for Token Sale Updates</a>
+  </section>
+
+  <section id="team">
+    <h2>Our Team</h2>
+    <p>Cuttlefish Labs is led by a team of visionaries in AI, blockchain, and infrastructure development. With decades of collective experience, we’re committed to building a decentralized future for AI computing. Our advisors include industry leaders in sustainable energy and Web3 finance, ensuring we deliver on our ambitious roadmap. Meet the minds driving the AI revolution.</p>
+    <ul>
+      <li><strong>David [Last Name TBD]</strong> - Founder & CEO<br>A Web3 pioneer and infrastructure innovator, David brings expertise in tokenized assets and sustainable development, with a track record of launching impactful projects like Centrifuge.</li>
+      <li><strong>[Name TBD]</strong> - Chief Technology Officer<br>An AI and blockchain expert with 10+ years of experience in scalable systems, leading the development of our AI planning tools.</li>
+      <li><strong>[Name TBD]</strong> - Head of Operations<br>Specialist in energy infrastructure, overseeing land acquisition and cluster deployment in the Permian Basin.</li>
+    </ul>
+    <p><strong>Advisors</strong>: [Name TBD] - Former exec at [relevant company], advising on hyperscaler partnerships.</p>
+    <a href="#contact" class="cta">Contact Us</a>
+  </section>
+
+  <section id="partners">
+    <h2>Partners & Ecosystem</h2>
+    <p>We're collaborating with leaders in:</p>
+    <ul>
+      <li>🛰️ GPU hardware and liquid-cooled data centers</li>
+      <li>🌞 Renewable energy partners (floating solar, geothermal)</li>
+      <li>🌐 DAO infrastructure providers</li>
+      <li>🗂️ RWA tokenization protocols (e.g., Centrifuge, Tangible)</li>
+      <li>🛠️ Legal & compliance specialists (DAO-first frameworks)</li>
+    </ul>
+    <p><strong>Target Partners</strong>: Modular.ai, Galaxy Digital (Infra), Centrifuge, Aragon/Gnosis Guild, DOE Tech Hubs (pending discussions)</p>
+    <a href="#contact" class="cta">Want to Partner?</a>
+  </section>
+
+  <section id="roadmap">
+    <h2>Our Roadmap</h2>
+    <p>Cuttlefish Labs is in the early stages, but our path to revolutionizing AI infrastructure is clear. Our roadmap outlines key milestones, from community building to operational data clusters. We’re transparent about our pre-product phase and committed to delivering tangible results. Explore our journey and join us to shape the future of decentralized AI.</p>
+    <ul>
+      <li><strong>Q4 2025</strong>: Launch CuttlefishLabs.io, release white paper, build community on Discord/Telegram.</li>
+      <li><strong>Q1 2026</strong>: Token sale to fund development and land acquisition.</li>
+      <li><strong>Q3 2026</strong>: Prototype of Cuttlefish AI planning tool completed.</li>
+      <li><strong>Q1 2027</strong>: Secure land leases in Permian Basin, begin site planning.</li>
+      <li><strong>Q4 2027</strong>: First AI data clusters operational, with hyperscaler leasing agreements.</li>
+      <li><strong>2028+</strong>: Multi-region AI Mesh—cross-border node federation for a sovereign compute network, the Earth 2.0 Compute Layer.</li>
+    </ul>
+    <a href="#subscribe-whitepaper" class="cta">Stay Updated</a>
+  </section>
+
+  <section id="community">
+    <h2>Join Our Community</h2>
+    <p>Cuttlefish Labs is more than a project—it’s a movement. Our Infrastructure DAO puts the community at the heart of AI innovation. Join thousands of supporters on Discord, Telegram, and Twitter to discuss our vision, propose ideas, and shape the future of decentralized computing. Early community members get exclusive updates, access to governance discussions, and potential token sale perks. Whether you’re an investor, developer, or AI enthusiast, your voice matters. Let’s build the future together.</p>
+    <p>
+      <a href="[Insert Discord Link]" class="cta">Discord</a>
+      <a href="[Insert Telegram Link]" class="cta">Telegram</a>
+      <a href="[Insert Twitter Link]" class="cta">Twitter</a>
+    </p>
+    <a href="#community" class="cta">Join Now</a>
+  </section>
+
+  <section id="media">
+    <h2>In the News</h2>
+    <p>Stay informed about Cuttlefish Labs’ journey to revolutionize AI infrastructure. Our blog and press releases provide updates on development, partnerships, and community growth. As we progress, we’ll share media coverage highlighting our impact. Check back for the latest news and insights into our decentralized vision.</p>
+    <p><strong>Blog Post:</strong> <a href="#">Why Decentralized AI Matters</a> - Explaining the need for community-owned infrastructure.</p>
+    <a href="#media" class="cta">Read Our Blog</a>
+  </section>
+
+  <section id="faq">
+    <h2>Frequently Asked Questions</h2>
+    <ul>
+      <li><strong>What is Cuttlefish Labs?</strong><br>A project to build decentralized AI data clusters managed by an Infrastructure DAO, using AI planning tools and blockchain governance.</li>
+      <li><strong>What is an Infrastructure DAO?</strong><br>A decentralized autonomous organization where token holders vote on decisions like cluster development and partnerships.</li>
+      <li><strong>Is there a working product?</strong><br>We’re in the early stages, focusing on design and community building. Our prototype is targeted for Q3 2026.</li>
+      <li><strong>How can I invest?</strong><br>Join our token sale in Q1 2026. Sign up for updates to stay informed.</li>
+      <li><strong>What are the risks?</strong><br>Risks include technical challenges and regulatory hurdles. We’re mitigating these with expert leadership and strategic partnerships.</li>
+    </ul>
+    <a href="#contact" class="cta">Contact Us for More Questions</a>
+  </section>
+
+  <section id="contact">
+    <h2>Get in Touch</h2>
+    <p>Have questions about Cuttlefish Labs or want to explore partnership opportunities? Our team is here to help. Reach out via email or our contact form to discuss investment, technical details, or community involvement. Let’s collaborate to build the future of AI infrastructure.</p>
+    <p>Email: <a href="mailto:info@cuttlefishlabs.io">info@cuttlefishlabs.io</a></p>
+    <form>
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" required></textarea>
+      <select name="reason">
+        <option value="investment">Investment</option>
+        <option value="partnership">Partnership</option>
+        <option value="general">General</option>
+      </select>
+      <button type="submit" class="cta">Send Message</button>
+    </form>
+  </section>
+
+  <footer>
+    <h3>Stay Connected</h3>
+    <form id="footer-subscribe">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="interest" value="investing"> Investing</label>
+        <label><input type="checkbox" name="interest" value="building"> Building</label>
+        <label><input type="checkbox" name="interest" value="advising"> Advising</label>
+        <label><input type="checkbox" name="interest" value="updates"> General Updates</label>
+      </div>
+      <button type="submit" class="cta">Subscribe</button>
+    </form>
+    <p>&copy; 2025 Cuttlefish Labs. All rights reserved.</p>
+  </footer>
+</body>
+</html>
