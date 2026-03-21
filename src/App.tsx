@@ -7,6 +7,7 @@ import AgentsSection from './components/sections/AgentsSection'
 import CapitalStack from './components/sections/CapitalStack'
 import ContractsSection from './components/sections/ContractsSection'
 import AgentBankSection from './components/sections/AgentBankSection'
+import KYASection from './components/sections/KYASection'
 import ReturnsSection from './components/sections/ReturnsSection'
 import InvestSection from './components/sections/InvestSection'
 import TrustGraphSection from './components/sections/TrustGraphSection'
@@ -120,6 +121,10 @@ function App() {
       <hr className="section-divider" />
 
       <AgentBankSection />
+
+      <hr className="section-divider" />
+
+      <KYASection />
 
       <hr className="section-divider" />
 
