@@ -56,6 +56,14 @@ const SCORE_EVENTS = [
   { label: 'Governance participation', delta: +3, type: 'investor' },
 ]
 
+// Sectors shown on the pie ring when a node is selected
+const PIE_SECTORS = [
+  { key: 'TRUST',  color: '#44ffaa' },
+  { key: 'FILES',  color: '#6274ea' },
+  { key: 'WEIGHT', color: '#9945ff' },
+  { key: 'LINKS',  color: '#00d2ff' },
+]
+
 function scoreColor(s: number): string {
   if (s >= 80) return '#44ffaa'
   if (s >= 60) return '#ffbb33'
@@ -71,14 +79,32 @@ function scoreLabel(s: number): string {
   return 'Restricted'
 }
 
+function getSectorValues(n: TGNode, edgeCount: number) {
+  const a = AGENTS.find(ag => ag.id === n.id)
+  return [
+    n.score / 100,
+    a ? a.files.filter(f => f.status === 'active' || f.status === 'live').length / Math.max(a.files.length, 1) : 0.5,
+    n.type === 'governance' ? 0.85 : n.type === 'investor' ? 0.65 : 0.75,
+    Math.min(1, edgeCount / 10),
+  ]
+}
+
 // ── CANVAS ENGINE ─────────────────────────────────────────────────────
-function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; applyEvent: (nodeId: string, delta: number, label: string) => void } {
+function initTrustGraph(
+  canvas: HTMLCanvasElement,
+  onNodeClick: (nodeId: string | null, xFrac: number, yFrac: number) => void,
+): {
+  destroy: () => void
+  applyEvent: (nodeId: string, delta: number, label: string) => void
+  setSelected: (nodeId: string | null) => void
+} {
   const ctx = canvas.getContext('2d')!
   let W = 0, H = 0
   let tick = 0
   let rafId = 0
   let nodes: TGNode[] = []
   let edges: TGEdge[] = []
+  let selectedId: string | null = null
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
 
   function resize() {
@@ -111,7 +137,6 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
       }
     })
 
-    // Add some unknown network nodes for visual depth
     for (let i = 0; i < 18; i++) {
       const angle = Math.random() * Math.PI * 2
       const r = Math.min(W, H) * (0.12 + Math.random() * 0.38)
@@ -131,7 +156,6 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
       })
     }
 
-    // Build edges
     edges = []
     const named = nodes.slice(0, AGENTS.length)
     named.forEach((a, i) => {
@@ -140,7 +164,6 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
           edges.push({ a, b, strength: 0.3 + Math.random() * 0.7, flowPhase: Math.random() * Math.PI * 2 })
         }
       })
-      // Connect to some unknown nodes
       nodes.slice(AGENTS.length).filter(() => Math.random() > 0.65).forEach(u => {
         edges.push({ a, b: u, strength: 0.15 + Math.random() * 0.3, flowPhase: Math.random() * Math.PI * 2 })
       })
@@ -150,19 +173,12 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
   function physics() {
     const cx = W / 2, cy = H / 2
     nodes.forEach(n => {
-      // Soft score interpolation
       n.score += (n.targetScore - n.score) * 0.04
       n.r = (n.type === 'unknown' ? 6 : 14) + n.score * (n.type === 'unknown' ? 0.04 : 0.1)
-
-      // Gentle drift
       n.vx += (Math.random() - 0.5) * 0.15
       n.vy += (Math.random() - 0.5) * 0.15
-
-      // Attract to center
       n.vx += (cx - n.x) * 0.0008
       n.vy += (cy - n.y) * 0.0008
-
-      // Repel from other nodes
       nodes.forEach(m => {
         if (m === n) return
         const dx = n.x - m.x, dy = n.y - m.y
@@ -174,24 +190,84 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
           n.vy += (dy / dist) * force
         }
       })
-
-      // Damping
-      n.vx *= 0.88
-      n.vy *= 0.88
-      n.x += n.vx
-      n.y += n.vy
-
-      // Bounds
+      n.vx *= 0.88; n.vy *= 0.88
+      n.x += n.vx; n.y += n.vy
       const pad = n.r + 20
       if (n.x < pad) n.vx += 0.5
       if (n.x > W - pad) n.vx -= 0.5
       if (n.y < pad) n.vy += 0.5
       if (n.y > H - pad) n.vy -= 0.5
-
-      // Fade event label
       if (n.eventAlpha > 0) n.eventAlpha -= 0.008
     })
     edges.forEach(e => { e.flowPhase += 0.018 })
+  }
+
+  function drawSelectedRings(n: TGNode, sc: string, nr: number) {
+    // ── Selection highlight ring
+    ctx.beginPath(); ctx.arc(n.x, n.y, nr + 3, 0, Math.PI * 2)
+    ctx.strokeStyle = `${sc}99`; ctx.lineWidth = 1.5; ctx.stroke()
+
+    // ── Ring 1: trust arc donut (nr+7 to nr+13)
+    const r1i = nr + 7, r1o = nr + 13
+    // background full ring
+    ctx.beginPath(); ctx.arc(n.x, n.y, r1o, 0, Math.PI * 2); ctx.arc(n.x, n.y, r1i, Math.PI * 2, 0, true); ctx.closePath()
+    ctx.fillStyle = sc; ctx.globalAlpha = 0.1; ctx.fill(); ctx.globalAlpha = 1
+    // filled arc proportional to trust score
+    const trustEnd = -Math.PI / 2 + Math.PI * 2 * (n.score / 100)
+    ctx.beginPath(); ctx.arc(n.x, n.y, r1o, -Math.PI / 2, trustEnd); ctx.arc(n.x, n.y, r1i, trustEnd, -Math.PI / 2, true); ctx.closePath()
+    ctx.fillStyle = sc; ctx.globalAlpha = 0.75; ctx.fill(); ctx.globalAlpha = 1
+
+    // ── Ring 2: 4-sector pie donut (nr+17 to nr+27)
+    const r2i = nr + 17, r2o = nr + 27
+    const nodeEdgeCount = edges.filter(e => e.a.id === n.id || e.b.id === n.id).length
+    const sectorVals = getSectorValues(n, nodeEdgeCount)
+
+    sectorVals.forEach((val, i) => {
+      const color = PIE_SECTORS[i].color
+      const sStart = -Math.PI / 2 + i * (Math.PI / 2)
+      const sEnd   = sStart + Math.PI / 2
+      const fillEnd = sStart + (Math.PI / 2) * Math.min(1, val)
+
+      // Background sector
+      ctx.beginPath(); ctx.arc(n.x, n.y, r2o, sStart, sEnd); ctx.arc(n.x, n.y, r2i, sEnd, sStart, true); ctx.closePath()
+      ctx.fillStyle = color; ctx.globalAlpha = 0.08; ctx.fill(); ctx.globalAlpha = 1
+
+      // Filled sector
+      if (fillEnd > sStart) {
+        ctx.beginPath(); ctx.arc(n.x, n.y, r2o, sStart, fillEnd); ctx.arc(n.x, n.y, r2i, fillEnd, sStart, true); ctx.closePath()
+        ctx.fillStyle = color; ctx.globalAlpha = 0.6; ctx.fill(); ctx.globalAlpha = 1
+      }
+
+      // Divider line between sectors
+      ctx.beginPath()
+      ctx.moveTo(n.x + Math.cos(sStart) * r2i, n.y + Math.sin(sStart) * r2i)
+      ctx.lineTo(n.x + Math.cos(sStart) * r2o, n.y + Math.sin(sStart) * r2o)
+      ctx.strokeStyle = 'rgba(6,2,0,0.9)'; ctx.lineWidth = 1; ctx.stroke()
+
+      // Sector label
+      const midA = sStart + Math.PI / 4
+      ctx.font = '6px monospace'; ctx.textAlign = 'center'
+      ctx.fillStyle = `${color}cc`
+      ctx.fillText(PIE_SECTORS[i].key, n.x + Math.cos(midA) * (r2o + 9), n.y + Math.sin(midA) * (r2o + 9) + 2)
+    })
+
+    // ── Ring 3: outer tick ring (nr+32)
+    const r3 = nr + 32
+    ctx.beginPath(); ctx.arc(n.x, n.y, r3, 0, Math.PI * 2)
+    ctx.strokeStyle = `${sc}33`; ctx.lineWidth = 0.5; ctx.stroke()
+    for (let t3 = 0; t3 < 16; t3++) {
+      const a = (t3 / 16) * Math.PI * 2
+      const len = t3 % 4 === 0 ? 5 : 3
+      ctx.beginPath()
+      ctx.moveTo(n.x + Math.cos(a) * r3, n.y + Math.sin(a) * r3)
+      ctx.lineTo(n.x + Math.cos(a) * (r3 + len), n.y + Math.sin(a) * (r3 + len))
+      ctx.strokeStyle = `${sc}55`; ctx.lineWidth = 0.5; ctx.stroke()
+    }
+
+    // ── Ring 4: animated outer pulse
+    const pulseR = nr + 44 + Math.sin(tick * 0.06) * 5
+    ctx.beginPath(); ctx.arc(n.x, n.y, pulseR, 0, Math.PI * 2)
+    ctx.strokeStyle = `${sc}22`; ctx.lineWidth = 0.75; ctx.stroke()
   }
 
   function draw() {
@@ -212,42 +288,40 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
       ctx.strokeStyle = `rgba(255,140,0,${alpha})`
       ctx.lineWidth = 0.5
       ctx.beginPath(); ctx.moveTo(e.a.x, e.a.y); ctx.lineTo(e.b.x, e.b.y); ctx.stroke()
-
-      // Flow particle
       const t = ((e.flowPhase % (Math.PI * 2)) / (Math.PI * 2))
       const px = e.a.x + dx * t, py = e.a.y + dy * t
-      const sc = scoreColor(e.a.score)
       ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI * 2)
-      ctx.fillStyle = sc.replace(')', `,${e.strength * 0.8})`).replace('rgb', 'rgba').replace('#', '')
-      // simpler:
-      ctx.fillStyle = sc
-      ctx.globalAlpha = e.strength * 0.5
-      ctx.fill()
-      ctx.globalAlpha = 1
+      ctx.fillStyle = scoreColor(e.a.score)
+      ctx.globalAlpha = e.strength * 0.5; ctx.fill(); ctx.globalAlpha = 1
     })
 
-    // Nodes
-    nodes.forEach(n => {
+    // Nodes (draw selected last so rings aren't hidden by other nodes)
+    const orderedNodes = [...nodes].sort((a, b) => (a.id === selectedId ? 1 : b.id === selectedId ? -1 : 0))
+
+    orderedNodes.forEach(n => {
       const sc = scoreColor(n.score)
       const pulse = Math.sin(tick * 0.04 + n.pulsePhase) * 0.15 + 0.85
       const named = n.type !== 'unknown'
+      const isSelected = n.id === selectedId
+
+      // Draw expanded rings BEHIND the node if selected
+      if (isSelected && named) {
+        drawSelectedRings(n, sc, n.r * pulse)
+      }
 
       // Outer glow
       if (named) {
-        
-        
-        
         ctx.beginPath(); ctx.arc(n.x, n.y, n.r * 2.8, 0, Math.PI * 2)
         ctx.fillStyle = `${sc}22`; ctx.fill()
       }
 
-      // Ring 1 — outer
+      // Outer ring
       if (named) {
         ctx.beginPath(); ctx.arc(n.x, n.y, n.r * pulse * 1.35, 0, Math.PI * 2)
         ctx.strokeStyle = `${sc}44`; ctx.lineWidth = 0.5; ctx.stroke()
       }
 
-      // Ring 2 — main
+      // Main ring
       ctx.beginPath(); ctx.arc(n.x, n.y, n.r * pulse, 0, Math.PI * 2)
       ctx.strokeStyle = named ? `${sc}cc` : `${sc}55`
       ctx.lineWidth = named ? 1.5 : 0.5; ctx.stroke()
@@ -256,15 +330,15 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
       ctx.beginPath(); ctx.arc(n.x, n.y, n.r * pulse * 0.85, 0, Math.PI * 2)
       ctx.fillStyle = named ? `${sc}18` : `${sc}08`; ctx.fill()
 
-      // Score arc (named nodes only)
-      if (named) {
+      // Score arc
+      if (named && !isSelected) {
         const arcEnd = -Math.PI / 2 + (Math.PI * 2) * (n.score / 100)
         ctx.beginPath(); ctx.arc(n.x, n.y, n.r * pulse + 4, -Math.PI / 2, arcEnd)
         ctx.strokeStyle = `${sc}99`; ctx.lineWidth = 2; ctx.stroke()
       }
 
-      // Tick marks (named)
-      if (named) {
+      // Tick marks
+      if (named && !isSelected) {
         for (let t2 = 0; t2 < 8; t2++) {
           const a = (t2 / 8) * Math.PI * 2
           const ri = n.r * pulse + 7, ro = ri + 3
@@ -277,18 +351,19 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
 
       // Label
       if (named) {
+        const labelR = isSelected ? n.r * pulse + 52 : n.r * pulse + 18
         ctx.font = `9px 'Share Tech Mono', monospace`
         ctx.textAlign = 'center'
-        ctx.fillStyle = `${sc}cc`
-        ctx.fillText(n.label, n.x, n.y + n.r * pulse + 18)
+        ctx.fillStyle = isSelected ? `${sc}ff` : `${sc}cc`
+        ctx.fillText(n.label, n.x, n.y + labelR)
         ctx.fillStyle = `rgba(255,160,0,0.5)`
         ctx.font = `8px 'Share Tech Mono', monospace`
-        ctx.fillText(`${Math.round(n.score)}`, n.x, n.y + n.r * pulse + 28)
+        ctx.fillText(`${Math.round(n.score)}`, n.x, n.y + labelR + 10)
       }
 
       // Event label
       if (n.eventAlpha > 0 && n.lastEvent) {
-        const delta = n.targetScore - (n.score - (n.targetScore - n.score))
+        const delta = n.targetScore - n.score
         const positive = delta >= 0
         ctx.font = `8px 'Share Tech Mono', monospace`
         ctx.textAlign = 'center'
@@ -309,6 +384,36 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
     rafId = requestAnimationFrame(draw)
   }
 
+  // Click detection
+  canvas.addEventListener('click', (evt) => {
+    const rect = canvas.getBoundingClientRect()
+    const mx = (evt.clientX - rect.left) * (W / rect.width)
+    const my = (evt.clientY - rect.top) * (H / rect.height)
+    let bestDist = Infinity
+    const hit = nodes.filter(n => n.type !== 'unknown').reduce<TGNode | null>((best, n) => {
+      const d = Math.hypot(mx - n.x, my - n.y)
+      if (d <= n.r + 35 && d < bestDist) { bestDist = d; return n }
+      return best
+    }, null)
+    if (hit) {
+      const newId = hit.id === selectedId ? null : hit.id
+      selectedId = newId
+      onNodeClick(newId, hit.x / W, hit.y / H)
+    } else {
+      selectedId = null
+      onNodeClick(null, 0, 0)
+    }
+  })
+
+  // Pointer cursor on hover
+  canvas.addEventListener('mousemove', (evt) => {
+    const rect = canvas.getBoundingClientRect()
+    const mx = (evt.clientX - rect.left) * (W / rect.width)
+    const my = (evt.clientY - rect.top) * (H / rect.height)
+    const hit = nodes.filter(n => n.type !== 'unknown').some(n => Math.hypot(mx - n.x, my - n.y) <= n.r + 35)
+    canvas.style.cursor = hit ? 'pointer' : 'default'
+  })
+
   const resizeObserver = new ResizeObserver(() => { resize(); initNodes() })
   resizeObserver.observe(canvas)
   start()
@@ -327,6 +432,7 @@ function initTrustGraph(canvas: HTMLCanvasElement): { destroy: () => void; apply
       resizeObserver.disconnect()
     },
     applyEvent,
+    setSelected: (id: string | null) => { selectedId = id },
   }
 }
 
@@ -336,24 +442,31 @@ export default function TrustGraphSection() {
   const engineRef = useRef<ReturnType<typeof initTrustGraph> | null>(null)
   const [events, setEvents] = useState<ScoreEvent[]>([])
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
+  const [clickedNode, setClickedNode] = useState<{ id: string; xFrac: number; yFrac: number } | null>(null)
   const [agentScores, setAgentScores] = useState<Record<string, number>>(() =>
     Object.fromEntries(AGENTS.map(a => [a.id, a.trustScore ?? 65]))
   )
 
+  const handleNodeClick = useCallback((nodeId: string | null, xFrac: number, yFrac: number) => {
+    if (!nodeId) {
+      setClickedNode(null)
+      setSelectedAgent(null)
+    } else {
+      setClickedNode({ id: nodeId, xFrac, yFrac })
+      setSelectedAgent(nodeId)
+    }
+  }, [])
+
   // Auto-fire random events
   useEffect(() => {
     const interval = setInterval(() => {
-      const namedAgents = AGENTS
-      const agent = namedAgents[Math.floor(Math.random() * namedAgents.length)]
+      const agent = AGENTS[Math.floor(Math.random() * AGENTS.length)]
       const event = SCORE_EVENTS[Math.floor(Math.random() * SCORE_EVENTS.length)]
-
       engineRef.current?.applyEvent(agent.id, event.delta, event.label)
-
       setAgentScores(prev => ({
         ...prev,
         [agent.id]: Math.max(0, Math.min(100, (prev[agent.id] ?? 65) + event.delta))
       }))
-
       setEvents(prev => [{
         nodeId: agent.id,
         label: `${agent.name}: ${event.label}`,
@@ -361,15 +474,14 @@ export default function TrustGraphSection() {
         ts: Date.now(),
       }, ...prev.slice(0, 7)])
     }, 2200)
-
     return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
     if (!canvasRef.current) return
-    engineRef.current = initTrustGraph(canvasRef.current)
+    engineRef.current = initTrustGraph(canvasRef.current, handleNodeClick)
     return () => engineRef.current?.destroy()
-  }, [])
+  }, [handleNodeClick])
 
   const fireManualEvent = useCallback((agentId: string, delta: number, label: string) => {
     engineRef.current?.applyEvent(agentId, delta, label)
@@ -388,6 +500,19 @@ export default function TrustGraphSection() {
   const selected = AGENTS.find(a => a.id === selectedAgent)
   const selectedScore = selectedAgent ? (agentScores[selectedAgent] ?? 65) : null
 
+  // Build overlay data for clicked node
+  const clickedAgent = clickedNode ? AGENTS.find(a => a.id === clickedNode.id) : null
+  const clickedScore = clickedNode ? (agentScores[clickedNode.id] ?? 65) : 0
+  const clickedSc = scoreColor(clickedScore)
+  const clickedSectorVals = clickedAgent
+    ? [
+        clickedScore / 100,
+        clickedAgent.files.filter(f => f.status === 'active' || f.status === 'live').length / Math.max(clickedAgent.files.length, 1),
+        clickedAgent.type === 'governance' ? 0.85 : clickedAgent.type === 'investor' ? 0.65 : 0.75,
+        0.6, // placeholder for link density
+      ]
+    : []
+
   return (
     <section id="trustgraph" className="py-24" style={{ background: 'var(--bg1)' }}>
       <div className="max-w-[1200px] mx-auto px-8">
@@ -397,7 +522,7 @@ export default function TrustGraphSection() {
           <p className="section-label">Constitutional Infrastructure</p>
           <h2 className="section-title">TrustGraph —<br /><em>live constitutional scoring</em></h2>
           <p className="text-[11px] tracking-[0.06em] text-[rgba(255,160,0,0.55)] max-w-[600px] leading-[1.9] mt-3">
-            Every agent interaction is scored in real-time. Trust is slow to earn and fast to lose — asymmetric by design. Scores are cross-DAO portable via the CAC Transfer Protocol. Constitutional violations are permanent record.
+            Every agent interaction is scored in real-time. Trust is slow to earn and fast to lose — asymmetric by design. Click any named node to expand its constitutional detail rings.
           </p>
         </div>
 
@@ -406,6 +531,90 @@ export default function TrustGraphSection() {
           {/* Canvas */}
           <div className="relative" style={{ background: 'var(--bg0)', height: 480 }}>
             <canvas ref={canvasRef} className="block w-full h-full" />
+
+            {/* Click-node overlay panel */}
+            {clickedNode && clickedAgent && (
+              <div
+                className="absolute z-10 pointer-events-none"
+                style={{
+                  left: `${Math.min(Math.max(clickedNode.xFrac * 100, 8), 62)}%`,
+                  top: `${Math.min(Math.max(clickedNode.yFrac * 100, 10), 80)}%`,
+                  transform: clickedNode.xFrac > 0.55 ? 'translate(-100%, -50%)' : 'translate(20px, -50%)',
+                  width: 168,
+                }}
+              >
+                <div
+                  className="flex flex-col gap-2 p-3"
+                  style={{
+                    background: 'rgba(6,2,0,0.92)',
+                    border: `0.5px solid ${clickedSc}55`,
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-display text-[13px] font-semibold" style={{ color: clickedSc }}>
+                        {clickedAgent.name}
+                      </div>
+                      <div className="text-[7px] tracking-[0.1em] uppercase" style={{ color: 'rgba(255,160,0,0.45)' }}>
+                        {clickedAgent.type}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full"
+                        style={{ background: clickedAgent.status === 'online' ? '#44ffaa' : clickedAgent.status === 'standby' ? '#ffaa00' : '#aa88ff' }} />
+                      <span className="text-[7px] tracking-[0.08em] uppercase" style={{ color: 'rgba(255,160,0,0.4)' }}>
+                        {clickedAgent.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Trust score */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[7px] tracking-[0.1em] uppercase" style={{ color: 'rgba(255,160,0,0.4)' }}>Trust</span>
+                      <span className="font-display text-[14px] font-semibold" style={{ color: clickedSc }}>{Math.round(clickedScore)}</span>
+                    </div>
+                    <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,140,0,0.12)' }}>
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${clickedScore}%`, background: clickedSc }} />
+                    </div>
+                    <div className="text-[7px] tracking-[0.08em] mt-0.5" style={{ color: `${clickedSc}88` }}>
+                      {scoreLabel(clickedScore)}
+                    </div>
+                  </div>
+
+                  {/* 4 pie sector bars */}
+                  <div className="flex flex-col gap-1">
+                    {PIE_SECTORS.map((s, i) => (
+                      <div key={s.key} className="flex items-center gap-1.5">
+                        <span className="text-[6px] tracking-[0.1em] uppercase shrink-0" style={{ color: `${s.color}99`, width: 36 }}>{s.key}</span>
+                        <div className="flex-1 h-0.5 rounded-full" style={{ background: 'rgba(255,140,0,0.1)' }}>
+                          <div className="h-full rounded-full" style={{ width: `${(clickedSectorVals[i] ?? 0) * 100}%`, background: s.color }} />
+                        </div>
+                        <span className="text-[6px] font-display shrink-0" style={{ color: `${s.color}aa`, minWidth: 20, textAlign: 'right' }}>
+                          {Math.round((clickedSectorVals[i] ?? 0) * 100)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Files */}
+                  <div className="flex flex-wrap gap-1 pt-1" style={{ borderTop: '0.5px solid rgba(255,140,0,0.12)' }}>
+                    {clickedAgent.files.slice(0, 3).map((f, i) => (
+                      <span key={i} className="text-[6.5px] tracking-[0.06em] px-1 py-0.5"
+                        style={{ border: '0.5px solid rgba(255,140,0,0.2)', color: 'rgba(255,160,0,0.5)' }}>
+                        {f.name}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="text-[6px] tracking-[0.08em]" style={{ color: 'rgba(255,160,0,0.3)' }}>
+                    {clickedAgent.version} · click node to dismiss
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Score legend */}
             <div className="absolute top-4 left-4 flex flex-col gap-1.5">
@@ -422,10 +631,13 @@ export default function TrustGraphSection() {
               ))}
             </div>
 
-            {/* Live indicator */}
-            <div className="absolute top-4 right-4 flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#44ffaa', boxShadow: '0 0 5px #44ffaa', animation: 'pulse-dot 1.5s infinite' }} />
-              <span className="text-[8px] tracking-[0.12em] uppercase" style={{ color: 'rgba(68,255,170,0.6)' }}>Live</span>
+            {/* Live + click hint */}
+            <div className="absolute top-4 right-4 flex flex-col items-end gap-1">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#44ffaa', boxShadow: '0 0 5px #44ffaa', animation: 'pulse-dot 1.5s infinite' }} />
+                <span className="text-[8px] tracking-[0.12em] uppercase" style={{ color: 'rgba(68,255,170,0.6)' }}>Live</span>
+              </div>
+              <span className="text-[7px] tracking-[0.08em]" style={{ color: 'rgba(255,160,0,0.3)' }}>click node to inspect</span>
             </div>
           </div>
 
@@ -441,7 +653,12 @@ export default function TrustGraphSection() {
                   const sc = scoreColor(score)
                   return (
                     <button key={a.id}
-                      onClick={() => setSelectedAgent(selectedAgent === a.id ? null : a.id)}
+                      onClick={() => {
+                        const newId = selectedAgent === a.id ? null : a.id
+                        setSelectedAgent(newId)
+                        engineRef.current?.setSelected(newId)
+                        if (!newId) setClickedNode(null)
+                      }}
                       className="flex items-center justify-between p-2 text-left transition-all cursor-pointer"
                       style={{
                         background: selectedAgent === a.id ? `${sc}12` : 'transparent',
