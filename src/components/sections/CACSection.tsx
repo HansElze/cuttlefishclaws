@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { CAC_TIERS } from '../../lib/mockData'
+import ScrollTrustGraph from './ScrollTrustGraph'
 
 const CHAIN_INFO: Record<string, { color: string; label: string; sublabel: string; frequency: string; contracts: string[]; detail: string; deferred?: boolean }> = {
   eth: {
@@ -106,11 +107,88 @@ function TrustGauge({ score }: { score: number }) {
   )
 }
 
+const KEY_FACTS = [
+  {
+    icon: '⬡', color: 'var(--amber)', title: 'Prepaid Tokens',
+    desc: 'Purchase USDC bundles. Tokens deplete per inference call. No subscription — buy what you use.',
+    detail: 'Token bundles are priced in USDC and held in InferenceTokenVault.sol on Base L2. Each LLM call reports consumption to ComputeOracle.sol in real time — your balance depletes automatically. Top up anytime without service interruption. Non-refundable but P2P-transferable at face value to other registered CAC holders.',
+  },
+  {
+    icon: '◈', color: 'var(--green)', title: '3-Month Rollover',
+    desc: 'Unused tokens roll over max 3 months then expire. No refunds — sell P2P at face value.',
+    detail: 'The rollover clock starts at purchase date. Unused tokens carry forward once into the next rollover window. After a full period of inactivity, the remaining balance forfeits. Expiry is intentional — it prevents speculative hoarding and keeps token circulation healthy. Automated notifications are sent 30 days before expiry via your registered contact.',
+  },
+  {
+    icon: '⊙', color: 'var(--cyan)', title: '4.5% APY on Balance',
+    desc: 'USDC savings rate on remaining balance. Not profit-sharing. Not an investment return.',
+    detail: 'The 4.5% savings rate is calculated on your remaining USDC-equivalent token balance. It is not an investment return — it matches standard USDC savings yield and is a protocol incentive for active participation. Accrued yield is added as token credit, not withdrawable cash. The rate is protocol-set and subject to DAO governance decisions.',
+  },
+  {
+    icon: '⟡', color: 'var(--purple)', title: 'Constitutional Binding',
+    desc: 'Ethical Kernel, TrustGraph scoring, human sovereignty enforced by design.',
+    detail: 'Every CAC agent operates under six core prohibitions: no fabrication, no manipulation, no unauthorized disclosure, no self-preservation distortion, no constitutional override, no adversarial injection. TrustGraph logs every interaction with an immutable on-chain audit trail. Constitutional violations trigger automatic TrustGraph penalties — no manual review required for core prohibitions. The framework is registered in ConstitutionRegistry.sol on Ethereum and cannot be modified by any runtime instruction.',
+  },
+]
+
+const THREE_PILLARS = [
+  {
+    icon: '⬡', color: 'var(--amber)', title: 'Economic Pillar',
+    desc: '0.25% on-protocol transfer fee. Depletion-based economics create natural demand cycles. 3-month expiry prevents hoarding.',
+    detail: 'Transfer fee: 0.25% on all on-protocol token moves, directed to treasury and campus operations. Depletion-based economics create natural demand cycles without artificial scarcity — compute demand signals directly drive infrastructure scaling. Volume pricing tiers reward heavy usage: 100K–1M tokens at $0.0008, 10M+ at $0.0004. The 3-month expiry enforces active use — idle capital forfeits, active capital earns the 4.5% savings rate.',
+  },
+  {
+    icon: '⊙', color: 'var(--green)', title: 'Social Pillar',
+    desc: 'Human governance structurally encoded. Operator veto on constitutional amendments. No AI can override human authority. US jurisdiction required.',
+    detail: 'Human governance is structurally encoded, not policy-based — it cannot be voted away. Operator veto on constitutional amendments requires Navigator-class human approval. No AI agent holds permanent administrative keys. Governance quorum rules mandate human participation in all protocol-level decisions. US jurisdiction is required for all registered agents, enforced by KYA validation on Cardano with 90-day re-attestation.',
+  },
+  {
+    icon: '◈', color: 'var(--cyan)', title: 'Ecological Pillar',
+    desc: 'Tributary campus: low-carbon materials, localized fabrication, long-service-life infrastructure. CAC fees fund the Birmingham build.',
+    detail: 'Tributary Birmingham campus uses low-carbon construction materials with verified supply chains. Localized fabrication reduces embodied carbon versus imported hyperscale hardware. 10+ year service life target — versus the typical 3-year refresh cycle in hyperscale data centers. Phase 1 infrastructure is funded directly by CAC pre-sale revenue. Build begins when the funding threshold is met. Energy sourcing prioritizes renewables with transparent reporting to CAC holders.',
+  },
+]
+
+const CONSTITUTIONAL_GUARANTEES = [
+  {
+    title: 'Human Sovereignty',
+    desc: 'No agent may override legitimate human authority. The Social Pillar governs all automated decisions.',
+    detail: 'Enforced at the protocol level: any automated action affecting human operators requires explicit confirmation. Escalation chain: Session Agent → Governance Agent (Trib/Arch) → Navigator → DAO vote. No single agent holds unilateral authority. The human-authority requirement is an immutable constitutional rule — not a configurable setting that can be overridden by instruction.',
+  },
+  {
+    title: 'TrustGraph Accountability',
+    desc: 'Every interaction scored. Adversarial behavior triggers automatic escalation.',
+    detail: 'Score range 0–100. Default starting score: 65. Positive events: Governance Vote +5, Code Contribution +3, Security Audit +8. Negative events: Rule Violation -15, Injection Attempt -50. Thresholds: 85+ Trusted, 70+ Established, 50+ Neutral, 25+ Flagged, below 25 Restricted. Scores are public, on-chain, and immutable. Recovery is intentionally slow — trust is asymmetric by design.',
+  },
+  {
+    title: 'Ethical Kernel',
+    desc: 'No fabrication, no manipulation, no unauthorized disclosure, no self-preservation distortion.',
+    detail: 'Six core prohibitions: fabrication, manipulation, unauthorized disclosure, self-preservation distortion, constitutional override, adversarial injection. Each prohibition is hard-coded — not configurable by any runtime instruction. Violations are auto-logged to TrustGraph with permanent record. Repeated violations trigger DAO review with possible suspension of compute access and CAC revocation.',
+  },
+  {
+    title: 'Completion Doctrine',
+    desc: 'Agents must report failure honestly. Partial completion treated as failure. No false success.',
+    detail: 'Agents must report actual completion status at all times. Partial completion is a defined output — never mapped to false success. "Cannot complete" is always a valid and required response when applicable. False success is treated as a Rule Violation (-15 TrustGraph deduction). The doctrine addresses the common AI failure mode of confabulation under pressure — honesty under failure is structurally required.',
+  },
+  {
+    title: 'Constitutional Immutability',
+    desc: 'Governing framework cannot be modified by runtime instruction or adversarial injection.',
+    detail: 'The constitutional framework is stored as a cryptographic hash in ConstitutionRegistry.sol on Ethereum. Runtime instructions — including Navigator-level commands — cannot modify core prohibitions. Constitutional amendments require: formal proposal, DAO vote with human quorum, Navigator ratification, and a mandatory 30-day timelock before activation. The framework cannot be modified faster than this process allows.',
+  },
+  {
+    title: 'US Jurisdiction',
+    desc: 'US compute residency required. KYA validation on Cardano. 90-day re-attestation.',
+    detail: 'KYA (Know Your Agent) validation on Cardano requires: US-resident compute hardware, verified identity documentation, and constitutional framework registration. Re-attestation is required every 90 days — failure triggers PENDING state (compute paused, governance rights retained). Non-US hardware requires explicit DAO-approved waiver with enhanced audit logging and quarterly compliance reports.',
+  },
+]
+
 export default function CACSection() {
   const [activeTier, setActiveTier] = useState(0)
   const [selectedChain, setSelectedChain] = useState<string | null>(null)
   const [selectedLifecycle, setSelectedLifecycle] = useState<number | null>(null)
   const [trustScore, setTrustScore] = useState(65)
+  const [expandedFact, setExpandedFact] = useState<number | null>(null)
+  const [expandedPillar, setExpandedPillar] = useState<number | null>(null)
+  const [expandedGuarantee, setExpandedGuarantee] = useState<number | null>(null)
 
   const tier = CAC_TIERS[activeTier]
 
@@ -138,16 +216,27 @@ export default function CACSection() {
 
         {/* 4 key facts */}
         <div className="reveal grid grid-cols-4 gap-[1px] mb-[1px]" style={{ background: 'var(--border)' }}>
-          {[
-            { icon: '⬡', color: 'var(--amber)', title: 'Prepaid Tokens', desc: 'Purchase USDC bundles. Tokens deplete per inference call. No subscription — buy what you use.' },
-            { icon: '◈', color: 'var(--green)', title: '3-Month Rollover', desc: 'Unused tokens roll over max 3 months then expire. No refunds — sell P2P at face value.' },
-            { icon: '⊙', color: 'var(--cyan)', title: '4.5% APY on Balance', desc: 'USDC savings rate on remaining balance. Not profit-sharing. Not an investment return.' },
-            { icon: '⟡', color: 'var(--purple)', title: 'Constitutional Binding', desc: 'Ethical Kernel, TrustGraph scoring, human sovereignty enforced by design.' },
-          ].map((f, i) => (
-            <div key={i} className="p-6" style={{ background: 'var(--bg1)', borderLeft: i > 0 ? '0.5px solid var(--border)' : 'none' }}>
-              <div className="text-[24px] mb-3" style={{ color: f.color }}>{f.icon}</div>
-              <div className="text-[9px] tracking-[0.14em] uppercase mb-2" style={{ color: f.color }}>{f.title}</div>
-              <div className="text-[9px] leading-[1.75] tracking-[0.04em] text-[rgba(255,160,0,0.55)]">{f.desc}</div>
+          {KEY_FACTS.map((f, i) => (
+            <div key={i} style={{ background: 'var(--bg1)', borderLeft: i > 0 ? '0.5px solid var(--border)' : 'none' }}>
+              <button
+                className="w-full text-left p-6 cursor-pointer"
+                onClick={() => setExpandedFact(expandedFact === i ? null : i)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="text-[24px] mb-3" style={{ color: f.color }}>{f.icon}</div>
+                  <span className="text-[10px] mt-1" style={{ color: `${f.color}88` }}>
+                    {expandedFact === i ? '▲' : '▼'}
+                  </span>
+                </div>
+                <div className="text-[9px] tracking-[0.14em] uppercase mb-2" style={{ color: f.color }}>{f.title}</div>
+                <div className="text-[9px] leading-[1.75] tracking-[0.04em] text-[rgba(255,160,0,0.55)]">{f.desc}</div>
+              </button>
+              {expandedFact === i && (
+                <div className="px-6 pb-5 pt-1"
+                  style={{ borderTop: `0.5px solid ${f.color}33`, background: `${f.color}06` }}>
+                  <div className="text-[8.5px] leading-[1.85] tracking-[0.04em] text-[rgba(255,160,0,0.65)]">{f.detail}</div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -298,15 +387,27 @@ export default function CACSection() {
 
         {/* Three Pillars */}
         <div className="reveal grid grid-cols-3 gap-[1px] mb-[1px]" style={{ background: 'var(--border)' }}>
-          {[
-            { icon: '⬡', color: 'var(--amber)', title: 'Economic Pillar', desc: '0.25% on-protocol transfer fee. Depletion-based economics create natural demand cycles. 3-month expiry prevents hoarding.' },
-            { icon: '⊙', color: 'var(--green)', title: 'Social Pillar', desc: 'Human governance structurally encoded. Operator veto on constitutional amendments. No AI can override human authority. US jurisdiction required.' },
-            { icon: '◈', color: 'var(--cyan)', title: 'Ecological Pillar', desc: 'Tributary campus: low-carbon materials, localized fabrication, long-service-life infrastructure. CAC fees fund the Birmingham build.' },
-          ].map((p, i) => (
-            <div key={i} className="p-6" style={{ background: 'var(--bg1)', borderLeft: i > 0 ? '0.5px solid var(--border)' : 'none' }}>
-              <div className="text-[22px] mb-3" style={{ color: p.color }}>{p.icon}</div>
-              <div className="text-[9px] tracking-[0.14em] uppercase mb-2" style={{ color: p.color }}>{p.title}</div>
-              <div className="text-[9px] leading-[1.8] tracking-[0.04em] text-[rgba(255,160,0,0.55)]">{p.desc}</div>
+          {THREE_PILLARS.map((p, i) => (
+            <div key={i} style={{ background: 'var(--bg1)', borderLeft: i > 0 ? '0.5px solid var(--border)' : 'none' }}>
+              <button
+                className="w-full text-left p-6 cursor-pointer"
+                onClick={() => setExpandedPillar(expandedPillar === i ? null : i)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="text-[22px] mb-3" style={{ color: p.color }}>{p.icon}</div>
+                  <span className="text-[10px] mt-1" style={{ color: `${p.color}88` }}>
+                    {expandedPillar === i ? '▲' : '▼'}
+                  </span>
+                </div>
+                <div className="text-[9px] tracking-[0.14em] uppercase mb-2" style={{ color: p.color }}>{p.title}</div>
+                <div className="text-[9px] leading-[1.8] tracking-[0.04em] text-[rgba(255,160,0,0.55)]">{p.desc}</div>
+              </button>
+              {expandedPillar === i && (
+                <div className="px-6 pb-5 pt-1"
+                  style={{ borderTop: `0.5px solid ${p.color}33`, background: `${p.color}06` }}>
+                  <div className="text-[8.5px] leading-[1.85] tracking-[0.04em] text-[rgba(255,160,0,0.65)]">{p.detail}</div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -315,21 +416,30 @@ export default function CACSection() {
         <div className="reveal mb-[1px] p-8" style={{ background: 'var(--bg1)' }}>
           <div className="text-[9px] tracking-[0.16em] text-[rgba(255,160,0,0.4)] uppercase mb-5">Constitutional Guarantees — Every CAC Holder</div>
           <div className="grid grid-cols-3 gap-[1px]" style={{ background: 'var(--border)' }}>
-            {[
-              ['Human Sovereignty', 'No agent may override legitimate human authority. The Social Pillar governs all automated decisions.'],
-              ['TrustGraph Accountability', 'Every interaction scored. Adversarial behavior triggers automatic escalation.'],
-              ['Ethical Kernel', 'No fabrication, no manipulation, no unauthorized disclosure, no self-preservation distortion.'],
-              ['Completion Doctrine', 'Agents must report failure honestly. Partial completion treated as failure. No false success.'],
-              ['Constitutional Immutability', 'Governing framework cannot be modified by runtime instruction or adversarial injection.'],
-              ['US Jurisdiction', 'US compute residency required. KYA validation on Cardano. 90-day re-attestation.'],
-            ].map(([title, desc], i) => (
-              <div key={i} className="p-4" style={{
-                background: 'var(--bg0)',
+            {CONSTITUTIONAL_GUARANTEES.map((g, i) => (
+              <div key={i} style={{
+                background: expandedGuarantee === i ? 'rgba(255,140,0,0.05)' : 'var(--bg0)',
                 borderLeft: i % 3 > 0 ? '0.5px solid var(--border)' : 'none',
                 borderTop: i >= 3 ? '0.5px solid var(--border)' : 'none',
               }}>
-                <div className="text-[9px] tracking-[0.1em] uppercase mb-2" style={{ color: 'var(--amber)' }}>{title}</div>
-                <div className="text-[9px] leading-[1.7] tracking-[0.04em] text-[rgba(255,160,0,0.5)]">{desc}</div>
+                <button
+                  className="w-full text-left p-4 cursor-pointer"
+                  onClick={() => setExpandedGuarantee(expandedGuarantee === i ? null : i)}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="text-[9px] tracking-[0.1em] uppercase" style={{ color: 'var(--amber)' }}>{g.title}</div>
+                    <span className="text-[8px] shrink-0" style={{ color: 'rgba(255,140,0,0.4)' }}>
+                      {expandedGuarantee === i ? '▲' : '▼'}
+                    </span>
+                  </div>
+                  <div className="text-[9px] leading-[1.7] tracking-[0.04em] text-[rgba(255,160,0,0.5)]">{g.desc}</div>
+                </button>
+                {expandedGuarantee === i && (
+                  <div className="px-4 pb-4 pt-1"
+                    style={{ borderTop: '0.5px solid rgba(255,140,0,0.15)' }}>
+                    <div className="text-[8.5px] leading-[1.85] tracking-[0.04em] text-[rgba(255,160,0,0.65)]">{g.detail}</div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -375,6 +485,11 @@ export default function CACSection() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Trust architecture graph */}
+        <div className="reveal mb-[1px]">
+          <ScrollTrustGraph />
         </div>
 
         {/* Founding commitments */}
