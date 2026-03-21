@@ -194,6 +194,7 @@ export default function KYASection() {
           <div style={{ display: 'flex', gap: 1, marginBottom: 1, background: 'var(--border)' }}>
             {PATTERNS.map((pat, i) => (
               <button key={pat.id} onClick={() => setActivePattern(i)}
+                data-testid="kya-pattern-tab" data-pattern={pat.id} role="tab" aria-selected={i === activePattern}
                 style={{
                   flex: 1, padding: '10px 8px', background: i === activePattern
                     ? `${pat.color}12` : 'var(--bg1)',

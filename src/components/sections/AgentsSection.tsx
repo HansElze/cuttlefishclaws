@@ -85,7 +85,7 @@ function AgentCard({ agent, onChat }: AgentCardProps) {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="reveal border border-[var(--border)] bg-[rgba(255,140,0,0.02)] hover:border-[var(--amber2)] transition-all">
+    <div className="reveal border border-[var(--border)] bg-[rgba(255,140,0,0.02)] hover:border-[var(--amber2)] transition-all" data-testid="agent-card" data-agent-id={agent.id}>
       {/* Main card header — always visible */}
       <div className="p-5">
         <div className="flex items-start justify-between mb-3">
@@ -163,6 +163,7 @@ function AgentCard({ agent, onChat }: AgentCardProps) {
             </button>
             <button
               onClick={() => onChat(agent.id)}
+              data-testid="agent-chat-btn"
               className="px-3 py-1 text-[8px] tracking-[0.1em] uppercase border border-[var(--amber2)] text-[var(--amber)] bg-[rgba(255,140,0,0.08)] hover:bg-[rgba(255,140,0,0.18)] transition-all cursor-pointer font-mono"
             >
               Chat &rarr;

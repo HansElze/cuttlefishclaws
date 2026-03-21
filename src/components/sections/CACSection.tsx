@@ -248,6 +248,7 @@ export default function CACSection() {
             {Object.entries(CHAIN_INFO).map(([key, chain], idx, arr) => (
               <div key={key}>
                 <button className="w-full text-left transition-all" style={{ opacity: chain.deferred ? 0.5 : 1 }}
+                  data-testid="chain-row" data-chain={key}
                   onClick={() => setSelectedChain(selectedChain === key ? null : key)}>
                   <div className="grid" style={{ gridTemplateColumns: '160px 1fr', background: 'var(--border)', gap: '1px' }}>
                     <div className="p-4 flex flex-col justify-center"
@@ -336,6 +337,7 @@ export default function CACSection() {
           <div className="flex" style={{ background: 'var(--border)', gap: '1px' }}>
             {CAC_TIERS.map((t, i) => (
               <button key={t.id} onClick={() => setActiveTier(i)}
+                data-testid="cac-tier-tab" data-tier={t.id}
                 className="flex-1 p-5 text-left transition-all font-mono cursor-pointer"
                 style={{
                   background: activeTier === i ? 'var(--bg2)' : 'var(--bg1)',
@@ -456,6 +458,7 @@ export default function CACSection() {
               <div className="flex flex-col gap-2">
                 {TRUST_ACTIONS.map((a, i) => (
                   <button key={i} onClick={() => setTrustScore(s => Math.max(0, Math.min(100, s + a.delta)))}
+                    data-testid="trust-action-btn" data-action={a.label}
                     className="flex items-center justify-between p-2.5 w-full text-left transition-all font-mono cursor-pointer"
                     style={{
                       border: `0.5px solid ${a.positive ? 'rgba(68,255,170,0.2)' : 'rgba(255,51,153,0.2)'}`,

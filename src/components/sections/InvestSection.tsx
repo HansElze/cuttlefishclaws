@@ -65,8 +65,9 @@ export default function InvestSection({ scrollTo, onShowReturns }: Props) {
             <button
               onClick={onShowReturns}
               className="btn-ghost"
+              data-testid="vc-briefing-btn"
             >
-              View Return Scenarios
+              VC Briefing →
             </button>
             <a
               href="mailto:invest@cuttlefish.ai"

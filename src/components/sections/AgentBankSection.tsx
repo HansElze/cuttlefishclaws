@@ -248,6 +248,7 @@ export default function AgentBankSection() {
             <div
               key={tier.id}
               onClick={() => setActiveTier(i)}
+              data-testid="agent-bank-tier-card" data-tier={tier.id} aria-selected={i === activeTier}
               className="cursor-pointer transition-all duration-300 relative"
               style={{
                 border: `1px solid ${i === activeTier ? tier.color + 'aa' : tier.border}`,
