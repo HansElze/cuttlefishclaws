@@ -6,6 +6,7 @@ import CACSection from './components/sections/CACSection'
 import AgentsSection from './components/sections/AgentsSection'
 import CapitalStack from './components/sections/CapitalStack'
 import ContractsSection from './components/sections/ContractsSection'
+import AgentBankSection from './components/sections/AgentBankSection'
 import ReturnsSection from './components/sections/ReturnsSection'
 import InvestSection from './components/sections/InvestSection'
 import TrustGraphSection from './components/sections/TrustGraphSection'
@@ -115,9 +116,13 @@ function App() {
       <hr className="section-divider" />
       
       <ContractsSection />
-      
+
       <hr className="section-divider" />
-      
+
+      <AgentBankSection />
+
+      <hr className="section-divider" />
+
       <InvestSection 
         scrollTo={scrollTo}
         onShowReturns={() => setShowReturns(true)}

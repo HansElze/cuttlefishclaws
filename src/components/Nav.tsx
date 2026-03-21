@@ -70,6 +70,14 @@ export default function Nav({ scrollTo }: NavProps) {
             Contracts
           </button>
         </li>
+        <li>
+          <button
+            onClick={() => scrollTo('agent-bank')}
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          >
+            Agent Bank
+          </button>
+        </li>
       </ul>
       
       <button
