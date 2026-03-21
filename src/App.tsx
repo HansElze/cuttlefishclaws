@@ -10,6 +10,7 @@ import ReturnsSection from './components/sections/ReturnsSection'
 import InvestSection from './components/sections/InvestSection'
 import TrustGraphSection from './components/sections/TrustGraphSection'
 import AgentBillOfRights from './components/sections/AgentBillOfRights'
+import CACSpecDocs from './components/sections/CACSpecDocs'
 import Footer from './components/Footer'
 import AgentChatModal from './components/agents/AgentChatModal'
 import { usePalette } from './hooks/usePalette'
@@ -79,9 +80,13 @@ function App() {
       <hr className="section-divider" />
       
       <CACSection />
-      
+
       <hr className="section-divider" />
-      
+
+      <CACSpecDocs />
+
+      <hr className="section-divider" />
+
       <AgentsSection onOpenChat={setChatAgent} />
       
       <hr className="section-divider" />

@@ -24,6 +24,14 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
+            onClick={() => scrollTo('cac-spec')}
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          >
+            Spec Docs
+          </button>
+        </li>
+        <li>
+          <button
             onClick={() => scrollTo('agents')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
