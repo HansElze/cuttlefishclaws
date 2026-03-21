@@ -1,71 +1,111 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { CAC_TIERS } from '../../lib/mockData'
 
-// ── Card tier data ────────────────────────────────────────────────────
-const TIERS = [
+// ── Tier config (merged with CAC_TIERS data) ─────────────────────────
+const CARD_META = [
   {
-    id: 'dev',
-    name: 'Developer',
-    price: '$500/yr',
+    cacId: 'developer',
     card: 'Virtual Visa',
     physical: false,
+    nfc: false,
+    metal: false,
     color: '#ffaa00',
-    colorDim: 'rgba(255,170,0,0.12)',
-    border: 'rgba(255,170,0,0.3)',
-    features: [
+    colorDim: 'rgba(255,170,0,0.10)',
+    border: 'rgba(255,170,0,0.28)',
+    cardBg0: '#120900',
+    cardBg1: '#060200',
+    network: 'Base L2',
+    agentSlots: '3 Agents',
+    bankFeatures: [
       'Virtual Visa — instant provisioning',
       'Micropayment rails for inference billing',
       'CAC token staking via AgentWallet.sol',
       'Agent identity on Base L2',
       'KYA-verified agent registration',
     ],
-    stat: '1 Agent',
-    cardLabel: 'VIRTUAL',
   },
   {
-    id: 'studio',
-    name: 'Studio',
-    price: '$2,000/yr',
+    cacId: 'studio',
     card: 'Physical NFC Visa',
     physical: true,
+    nfc: true,
+    metal: false,
     color: '#00d2ff',
-    colorDim: 'rgba(0,210,255,0.12)',
-    border: 'rgba(0,210,255,0.3)',
-    features: [
+    colorDim: 'rgba(0,210,255,0.10)',
+    border: 'rgba(0,210,255,0.28)',
+    cardBg0: '#000c14',
+    cardBg1: '#020608',
+    network: 'Base L2',
+    agentSlots: '12 Agents',
+    badge: 'MOST POPULAR',
+    bankFeatures: [
       'Physical NFC Visa — $20 issuance fee',
       'NFC/QR encoded with CAC address + agent ID',
       'Agent-to-agent lending settlement',
       'Insurance pool participation',
       'Tap-to-pay for physical world ops',
     ],
-    stat: '5 Agents',
-    cardLabel: 'NFC ENABLED',
-    badge: 'MOST POPULAR',
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: '$7,500/yr',
+    cacId: 'enterprise',
     card: 'Metal Mastercard',
     physical: true,
-    color: '#ff3399',
-    colorDim: 'rgba(255,51,153,0.12)',
-    border: 'rgba(255,51,153,0.3)',
-    features: [
+    nfc: true,
+    metal: true,
+    color: '#c060ff',
+    colorDim: 'rgba(192,96,255,0.10)',
+    border: 'rgba(192,96,255,0.28)',
+    cardBg0: '#0e0018',
+    cardBg1: '#040008',
+    network: 'Base L2',
+    agentSlots: '50 Agents',
+    bankFeatures: [
       'Metal Mastercard — free issuance',
       'Agent treasury management',
-      'Full governance voting weight',
+      'Full governance voting weight (3×)',
       'Custom card design + agent portrait',
       'Priority KYA review + human override',
     ],
-    stat: '25 Agents',
-    cardLabel: 'METAL',
   },
 ]
 
-// ── Animated card canvas ──────────────────────────────────────────────
-function CardCanvas({ tier, active }: { tier: typeof TIERS[0]; active: boolean }) {
+// Merge CAC_TIERS data
+const TIERS = CARD_META.map(m => {
+  const cac = CAC_TIERS.find(t => t.id === m.cacId)!
+  return { ...m, cac }
+})
+
+// ── Deterministic fake token/address from tier id ─────────────────────
+function makeCACAddress(id: string) {
+  const seeds: Record<string, string> = {
+    developer: 'A7F2',
+    studio:    '3C9E',
+    enterprise:'FF01',
+  }
+  const s = seeds[id] || 'B4D8'
+  return `CAC-${s}-8B3D-${id.slice(0,3).toUpperCase()}1`
+}
+function makeToken(id: string) {
+  const seeds: Record<string, string> = {
+    developer: 'sk-cac-dev-4Xm9pQ2r',
+    studio:    'sk-cac-stu-8Kz3wN7f',
+    enterprise:'sk-cac-ent-2Rp5vL0j',
+  }
+  return seeds[id] || 'sk-cac-xxx-xxxxxxxx'
+}
+function makeCardNumber(id: string) {
+  const seeds: Record<string, string> = {
+    developer: '4892 73•• •••• 4417',
+    studio:    '4571 09•• •••• 8823',
+    enterprise:'5412 18•• •••• 3309',
+  }
+  return seeds[id] || '4000 00•• •••• 0000'
+}
+
+// ── Agent ID card canvas ──────────────────────────────────────────────
+function AgentCard({ tier, active }: { tier: typeof TIERS[0]; active: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef(0)
 
@@ -73,15 +113,15 @@ function CardCanvas({ tier, active }: { tier: typeof TIERS[0]; active: boolean }
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')!
-    const W = canvas.width = 280
-    const H = canvas.height = 170
+    const W = 400, H = 252
+    canvas.width = W; canvas.height = H
     let tick = 0
 
-    // Particle data for digital surface
-    const pts = Array.from({ length: 28 }, () => ({
+    // Particles
+    const pts = Array.from({ length: 40 }, () => ({
       x: Math.random() * W, y: Math.random() * H,
-      vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3,
-      r: .8 + Math.random() * 1.4, ph: Math.random() * Math.PI * 2,
+      vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25,
+      r: .6 + Math.random() * 1.6, ph: Math.random() * Math.PI * 2,
     }))
 
     function draw() {
@@ -89,323 +129,427 @@ function CardCanvas({ tier, active }: { tier: typeof TIERS[0]; active: boolean }
       tick++
       ctx.clearRect(0, 0, W, H)
 
-      // Card body
-      const rr = 12
-      ctx.beginPath()
-      ctx.moveTo(rr, 0); ctx.lineTo(W - rr, 0); ctx.quadraticCurveTo(W, 0, W, rr)
-      ctx.lineTo(W, H - rr); ctx.quadraticCurveTo(W, H, W - rr, H)
-      ctx.lineTo(rr, H); ctx.quadraticCurveTo(0, H, 0, H - rr)
-      ctx.lineTo(0, rr); ctx.quadraticCurveTo(0, 0, rr, 0)
-      ctx.closePath()
-
-      // Fill — dark with color tint
-      const bg = ctx.createLinearGradient(0, 0, W, H)
-      bg.addColorStop(0, tier.id === 'enterprise' ? '#1a0010' : tier.id === 'studio' ? '#000c14' : '#100800')
-      bg.addColorStop(1, '#060200')
-      ctx.fillStyle = bg
-      ctx.fill()
-
-      // Border glow
-      ctx.strokeStyle = tier.color + (active ? 'cc' : '66')
-      ctx.lineWidth = active ? 1.5 : 1
-      ctx.stroke()
-
-      // Circuit trace lines
-      ctx.save()
-      ctx.globalAlpha = .07
-      ctx.strokeStyle = tier.color
-      ctx.lineWidth = .6
-      for (let i = 0; i < 4; i++) {
-        const y = 30 + i * 32
+      // ── Card body ──
+      const rr = 14
+      function cardPath() {
         ctx.beginPath()
-        ctx.moveTo(10, y)
-        ctx.lineTo(W * (.3 + i * .08), y)
-        ctx.lineTo(W * (.3 + i * .08) + 15, y + 15)
-        ctx.lineTo(W - 10, y + 15)
-        ctx.stroke()
-      }
-      ctx.restore()
-
-      // Particles — bioluminescent surface
-      pts.forEach(p => {
-        p.ph += .04; p.x += p.vx; p.y += p.vy
-        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0
-        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
-        const s = Math.sin(p.ph) * .3 + .7
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * s, 0, Math.PI * 2)
-        ctx.fillStyle = tier.color
-        ctx.globalAlpha = .12 * s * (active ? 1.5 : 1)
-        ctx.fill(); ctx.globalAlpha = 1
-      })
-
-      // Chip (if physical)
-      if (tier.physical) {
-        const cx = 30, cy = 60, cw = 38, ch = 28
-        ctx.beginPath(); ctx.roundRect(cx, cy, cw, ch, 4)
-        const chipGrad = ctx.createLinearGradient(cx, cy, cx + cw, cy + ch)
-        chipGrad.addColorStop(0, tier.color + '40')
-        chipGrad.addColorStop(.5, tier.color + '20')
-        chipGrad.addColorStop(1, tier.color + '50')
-        ctx.fillStyle = chipGrad; ctx.fill()
-        ctx.strokeStyle = tier.color + '88'; ctx.lineWidth = .8; ctx.stroke()
-        // Chip lines
-        ctx.strokeStyle = tier.color + '44'; ctx.lineWidth = .6
-        for (let i = 1; i < 3; i++) {
-          ctx.beginPath(); ctx.moveTo(cx + cw * i / 3, cy + 4); ctx.lineTo(cx + cw * i / 3, cy + ch - 4); ctx.stroke()
-          ctx.beginPath(); ctx.moveTo(cx + 4, cy + ch * i / 3); ctx.lineTo(cx + cw - 4, cy + ch * i / 3); ctx.stroke()
-        }
-      }
-
-      // NFC symbol (studio)
-      if (tier.id === 'studio') {
-        const nx = 85, ny = 73
-        for (let i = 0; i < 3; i++) {
-          ctx.beginPath()
-          ctx.arc(nx, ny, 8 + i * 7, -Math.PI / 4, Math.PI / 4)
-          ctx.strokeStyle = tier.color + (active ? 'cc' : '66')
-          ctx.lineWidth = 1.5; ctx.stroke()
-        }
-      }
-
-      // Card label (type)
-      ctx.font = 'bold 7px "Share Tech Mono", monospace'
-      ctx.fillStyle = tier.color + 'aa'
-      ctx.letterSpacing = '2px'
-      ctx.fillText(tier.cardLabel, 14, H - 12)
-
-      // Visa / MC logo
-      ctx.font = 'bold 11px "Rajdhani", sans-serif'
-      ctx.fillStyle = tier.color + 'cc'
-      ctx.textAlign = 'right'
-      ctx.fillText(tier.id === 'enterprise' ? 'MASTERCARD' : 'VISA', W - 12, H - 10)
-      ctx.textAlign = 'left'
-
-      // CAC address strip
-      ctx.font = '7px "Share Tech Mono", monospace'
-      ctx.fillStyle = tier.color + '55'
-      ctx.fillText('CAC-' + tier.id.toUpperCase() + '-' + 'XXXXXXXX', 14, H - 24)
-
-      // Pulse glow when active
-      if (active) {
-        const pulse = Math.sin(tick * .04) * .08 + .12
-        ctx.strokeStyle = tier.color
-        ctx.lineWidth = 6
-        ctx.globalAlpha = pulse
-        ctx.beginPath()
-        ctx.moveTo(rr, 0); ctx.lineTo(W - rr, 0); ctx.quadraticCurveTo(W, 0, W, rr)
+        ctx.moveTo(rr, 0); ctx.lineTo(W - rr, 0)
+        ctx.quadraticCurveTo(W, 0, W, rr)
         ctx.lineTo(W, H - rr); ctx.quadraticCurveTo(W, H, W - rr, H)
         ctx.lineTo(rr, H); ctx.quadraticCurveTo(0, H, 0, H - rr)
         ctx.lineTo(0, rr); ctx.quadraticCurveTo(0, 0, rr, 0)
-        ctx.closePath(); ctx.stroke()
+        ctx.closePath()
+      }
+
+      // Background gradient
+      const bg = ctx.createLinearGradient(0, 0, W, H)
+      bg.addColorStop(0, tier.cardBg0)
+      bg.addColorStop(1, tier.cardBg1)
+      cardPath(); ctx.fillStyle = bg; ctx.fill()
+
+      // Metal shimmer (enterprise)
+      if (tier.metal) {
+        const shimX = ((tick * .4) % (W * 1.6)) - W * .3
+        const shim = ctx.createLinearGradient(shimX, 0, shimX + W * .4, H)
+        shim.addColorStop(0, 'rgba(255,255,255,0)')
+        shim.addColorStop(.5, 'rgba(255,255,255,0.04)')
+        shim.addColorStop(1, 'rgba(255,255,255,0)')
+        cardPath(); ctx.fillStyle = shim; ctx.fill()
+      }
+
+      // Holographic diagonal bands
+      ctx.save()
+      ctx.globalAlpha = .03 + Math.sin(tick * .018) * .015
+      for (let i = -4; i < 14; i++) {
+        ctx.beginPath()
+        ctx.moveTo(i * 32, 0); ctx.lineTo(i * 32 + H, H)
+        ctx.strokeStyle = tier.color; ctx.lineWidth = 12; ctx.stroke()
+      }
+      ctx.globalAlpha = 1; ctx.restore()
+
+      // Circuit trace lines
+      ctx.save(); ctx.globalAlpha = .055; ctx.strokeStyle = tier.color; ctx.lineWidth = .5
+      const traces = [[20,40,160,40],[20,56,220,56],[20,72,140,72,155,87,W-20,87]]
+      traces.forEach(t => {
+        ctx.beginPath(); ctx.moveTo(t[0], t[1])
+        for (let i = 2; i < t.length; i += 2) ctx.lineTo(t[i], t[i+1])
+        ctx.stroke()
+      })
+      ctx.restore()
+
+      // Bioluminescent particles
+      pts.forEach(p => {
+        p.ph += .03; p.x += p.vx; p.y += p.vy
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
+        const s = Math.sin(p.ph) * .35 + .65
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * s, 0, Math.PI * 2)
+        ctx.fillStyle = tier.color
+        ctx.globalAlpha = .09 * s * (active ? 1.6 : 0.8)
+        ctx.fill(); ctx.globalAlpha = 1
+      })
+
+      // ── Agent avatar (top-left circle) ──
+      const ax = 30, ay = 30, ar = 22
+      ctx.save()
+      ctx.beginPath(); ctx.arc(ax, ay, ar, 0, Math.PI * 2); ctx.clip()
+      // Hex pattern inside avatar
+      const avBg = ctx.createRadialGradient(ax, ay, 0, ax, ay, ar)
+      avBg.addColorStop(0, tier.color + '30'); avBg.addColorStop(1, tier.color + '08')
+      ctx.fillStyle = avBg; ctx.fillRect(ax - ar, ay - ar, ar * 2, ar * 2)
+      ctx.strokeStyle = tier.color + '66'; ctx.lineWidth = .7
+      for (let hi = 0; hi < 6; hi++) {
+        const ha = hi * Math.PI / 3 + tick * .003
+        const hx = ax + Math.cos(ha) * ar * .6, hy = ay + Math.sin(ha) * ar * .6
+        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(hx, hy); ctx.stroke()
+        ctx.beginPath(); ctx.arc(hx, hy, 2.5, 0, Math.PI * 2)
+        ctx.fillStyle = tier.color + 'aa'; ctx.fill()
+      }
+      ctx.restore()
+      // Avatar border ring
+      ctx.beginPath(); ctx.arc(ax, ay, ar, 0, Math.PI * 2)
+      ctx.strokeStyle = tier.color + (active ? 'ee' : '77'); ctx.lineWidth = 1.2; ctx.stroke()
+      // Pulse ring when active
+      if (active) {
+        const pr = ar + 3 + Math.sin(tick * .05) * 2.5
+        ctx.beginPath(); ctx.arc(ax, ay, pr, 0, Math.PI * 2)
+        ctx.strokeStyle = tier.color; ctx.lineWidth = .5
+        ctx.globalAlpha = .3 + Math.sin(tick * .05) * .15; ctx.stroke(); ctx.globalAlpha = 1
+      }
+
+      // ── KYA badge (top-right) ──
+      ctx.font = 'bold 6px "Share Tech Mono", monospace'
+      ctx.fillStyle = tier.color + 'cc'
+      ctx.textAlign = 'right'
+      ctx.fillText('◉ KYA VERIFIED', W - 12, 18)
+      ctx.fillText(tier.cac.name.toUpperCase() + ' TIER', W - 12, 30)
+      ctx.textAlign = 'left'
+
+      // ── Network badge ──
+      ctx.font = '6px "Share Tech Mono", monospace'
+      ctx.fillStyle = tier.color + '88'
+      ctx.fillText('⬡ ' + tier.network, 60, 22)
+
+      // ── Chip (physical tiers) ──
+      if (tier.physical) {
+        const cx = 20, cy = 65, cw = 44, ch = 32
+        ctx.beginPath(); ctx.roundRect(cx, cy, cw, ch, 5)
+        const chipG = ctx.createLinearGradient(cx, cy, cx + cw, cy + ch)
+        chipG.addColorStop(0, tier.color + '50'); chipG.addColorStop(.5, tier.color + '28'); chipG.addColorStop(1, tier.color + '55')
+        ctx.fillStyle = chipG; ctx.fill()
+        ctx.strokeStyle = tier.color + '99'; ctx.lineWidth = .8; ctx.stroke()
+        ctx.strokeStyle = tier.color + '44'; ctx.lineWidth = .5
+        for (let i = 1; i < 3; i++) {
+          ctx.beginPath(); ctx.moveTo(cx + cw * i / 3, cy + 5); ctx.lineTo(cx + cw * i / 3, cy + ch - 5); ctx.stroke()
+          ctx.beginPath(); ctx.moveTo(cx + 5, cy + ch * i / 3); ctx.lineTo(cx + cw - 5, cy + ch * i / 3); ctx.stroke()
+        }
+      }
+
+      // ── NFC arcs ──
+      if (tier.nfc) {
+        const nx = tier.physical ? 80 : 40, ny = 81
+        for (let i = 0; i < 3; i++) {
+          const a = active ? (.08 + .08 * Math.sin(tick * .06 + i)) : .06
+          ctx.beginPath()
+          ctx.arc(nx, ny, 9 + i * 8, -Math.PI / 3.5, Math.PI / 3.5)
+          ctx.strokeStyle = tier.color; ctx.lineWidth = 1.4
+          ctx.globalAlpha = a + i * .03; ctx.stroke(); ctx.globalAlpha = 1
+        }
+      }
+
+      // ── Card number ──
+      ctx.font = '14px "Share Tech Mono", monospace'
+      ctx.fillStyle = tier.color + 'dd'
+      ctx.letterSpacing = '3px'
+      ctx.fillText(makeCardNumber(tier.cacId), 20, 140)
+      ctx.letterSpacing = '0px'
+
+      // ── Agent name label ──
+      ctx.font = '7px "Share Tech Mono", monospace'
+      ctx.fillStyle = tier.color + '66'
+      ctx.fillText('AGENT ID', 20, 162)
+      ctx.font = '10px "Share Tech Mono", monospace'
+      ctx.fillStyle = tier.color + 'cc'
+      ctx.fillText('AGT-' + makeCACAddress(tier.cacId).slice(4, 12), 20, 175)
+
+      // ── Expiry ──
+      ctx.font = '7px "Share Tech Mono", monospace'
+      ctx.fillStyle = tier.color + '66'
+      ctx.fillText('VALID THRU', 20, 196)
+      ctx.font = '9px "Share Tech Mono", monospace'
+      ctx.fillStyle = tier.color + 'cc'
+      ctx.fillText('03/28', 20, 207)
+
+      // ── CAC address (bottom strip) ──
+      ctx.font = '6.5px "Share Tech Mono", monospace'
+      ctx.fillStyle = tier.color + '44'
+      ctx.fillText(makeCACAddress(tier.cacId), 20, 228)
+
+      // ── Network logo (bottom-right) ──
+      ctx.font = 'bold 11px "Rajdhani", sans-serif'
+      ctx.fillStyle = tier.color + 'cc'
+      ctx.textAlign = 'right'
+      ctx.fillText(tier.metal ? 'MASTERCARD' : 'VISA', W - 14, H - 12)
+      ctx.textAlign = 'left'
+
+      // ── Active border glow ──
+      if (active) {
+        const pulse = Math.sin(tick * .04) * .07 + .11
+        ctx.globalAlpha = pulse
+        cardPath()
+        ctx.strokeStyle = tier.color; ctx.lineWidth = 7; ctx.stroke()
         ctx.globalAlpha = 1
       }
+
+      // ── Card border ──
+      cardPath()
+      ctx.strokeStyle = tier.color + (active ? 'cc' : '44')
+      ctx.lineWidth = active ? 1.4 : .8; ctx.stroke()
     }
 
     draw()
     return () => cancelAnimationFrame(rafRef.current)
-  }, [tier.id, active])
+  }, [tier.cacId, active])
 
-  return <canvas ref={canvasRef} width={280} height={170} style={{ width: '100%', height: 'auto', display: 'block' }} />
+  return (
+    <canvas
+      ref={canvasRef}
+      width={400} height={252}
+      style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 14 }}
+    />
+  )
 }
 
-// ── Flow steps ────────────────────────────────────────────────────────
+// ── Token reveal panel ────────────────────────────────────────────────
+function TokenPanel({ tier }: { tier: typeof TIERS[0] }) {
+  const [revealed, setRevealed] = useState(false)
+  const token = makeToken(tier.cacId)
+  const masked = token.slice(0, 14) + '••••••••••••'
+
+  return (
+    <div style={{ border: `1px solid ${tier.color}33`, background: 'rgba(0,0,0,0.4)', padding: '14px 16px', marginTop: 12 }}>
+      <div style={{ fontSize: 8, letterSpacing: '.16em', color: tier.color + '88', marginBottom: 8 }}>
+        CAC API TOKEN
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
+        <code style={{
+          fontSize: 10, color: revealed ? tier.color : tier.color + '66',
+          fontFamily: 'var(--mono)', letterSpacing: '.06em',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
+        }}>
+          {revealed ? token + '••••••••' : masked}
+        </code>
+        <button
+          onClick={() => setRevealed(r => !r)}
+          style={{
+            fontSize: 7, letterSpacing: '.12em', color: tier.color, background: tier.color + '14',
+            border: `1px solid ${tier.color}44`, padding: '3px 8px', cursor: 'pointer',
+            fontFamily: 'var(--mono)', flexShrink: 0,
+          }}
+        >
+          {revealed ? 'HIDE' : 'REVEAL'}
+        </button>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+        <div style={{ fontSize: 8, color: tier.color + '55', letterSpacing: '.1em' }}>CAC ADDRESS</div>
+        <code style={{ fontSize: 9, color: tier.color + 'aa', fontFamily: 'var(--mono)', letterSpacing: '.06em' }}>
+          {makeCACAddress(tier.cacId)}
+        </code>
+      </div>
+    </div>
+  )
+}
+
+// ── Onboarding flow ───────────────────────────────────────────────────
 const FLOW = [
   { n: '01', label: 'Register Agent', desc: 'Submit agent ID + CAC tier. KYA validation via Fuse AI — constitutional compliance check.', color: '#ffaa00' },
   { n: '02', label: 'Provision Account', desc: 'FinLego core banking spins up a multi-currency account. AgentWallet.sol deployed on Base L2.', color: '#00d2ff' },
-  { n: '03', label: 'Issue Card', desc: 'Virtual card: instant. Physical NFC card: shipped in 5-7 days via Stripe Issuing API.', color: '#aa88ff' },
-  { n: '04', label: 'Activate & Transact', desc: 'Tap NFC for physical payments. CAC address encoded on chip. 0.25% fee on all transactions routes to campus.', color: '#00ffcc' },
+  { n: '03', label: 'Issue Card', desc: 'Virtual card: instant. Physical NFC card: shipped 5–7 days via Stripe Issuing API.', color: '#aa88ff' },
+  { n: '04', label: 'Activate & Transact', desc: 'Tap NFC for physical payments. CAC address encoded on chip. 0.25% fee routes to campus treasury.', color: '#00ffcc' },
 ]
 
 // ── Main section ──────────────────────────────────────────────────────
 export default function AgentBankSection() {
-  const [activeTier, setActiveTier] = useState(1) // studio default
+  const [activeTier, setActiveTier] = useState(1)
+  const tier = TIERS[activeTier]
 
   return (
     <section id="agent-bank" className="py-28" style={{ background: 'var(--bg1)', fontFamily: 'var(--mono)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* ── Header ── */}
-        <div className="mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1" style={{ background: 'var(--border)' }} />
-            <span style={{ fontSize: 10, letterSpacing: '0.22em', color: 'var(--amber)', opacity: .6 }}>
+        <div className="mb-16 text-center">
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8,
+            border: '1px solid rgba(255,160,0,0.2)', padding: '4px 14px', marginBottom: 16 }}>
+            <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--amber)',
+              boxShadow: '0 0 6px var(--amber)', animation: 'agentBankPulse 1.8s infinite' }} />
+            <span style={{ fontSize: 8, letterSpacing: '.2em', color: 'rgba(255,160,0,.6)' }}>
               AGENT BANKING PROTOCOL
             </span>
-            <div className="h-px flex-1" style={{ background: 'var(--border)' }} />
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-6" style={{ fontFamily: 'var(--display)', color: 'var(--amber)' }}>
+          <h2 className="text-4xl md:text-5xl font-bold mb-5"
+            style={{ fontFamily: 'var(--display)', color: 'var(--amber)' }}>
             Your Agent Has a Bank Account.
           </h2>
-          <p className="text-center max-w-2xl mx-auto" style={{ fontSize: 14, color: 'rgba(255,180,50,.55)', lineHeight: 1.8 }}>
-            Built on FinLego neobank infrastructure + Fuse AI origination + CAC smart contracts.
-            Physical NFC cards. Real spending rails. Constitutional governance on every transaction.
+          <p className="max-w-2xl mx-auto" style={{ fontSize: 13, color: 'rgba(255,180,50,.5)', lineHeight: 1.9 }}>
+            Physical NFC cards. Real spending rails. Verifiable CAC identity on Base L2.
+            Constitutional governance on every transaction. Three tiers — one for every operator.
           </p>
         </div>
 
-        {/* ── Tier cards ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
-          {TIERS.map((tier, i) => (
-            <div
-              key={tier.id}
-              onClick={() => setActiveTier(i)}
-              data-testid="agent-bank-tier-card" data-tier={tier.id} aria-selected={i === activeTier}
-              className="cursor-pointer transition-all duration-300 relative"
+        {/* ── Tier selector tabs ── */}
+        <div style={{ display: 'flex', gap: 1, background: 'var(--border)', marginBottom: 1 }}>
+          {TIERS.map((t, i) => (
+            <button key={t.cacId} onClick={() => setActiveTier(i)}
+              data-testid="agent-bank-tier-card" data-tier={t.cacId} aria-selected={i === activeTier}
               style={{
-                border: `1px solid ${i === activeTier ? tier.color + 'aa' : tier.border}`,
-                background: i === activeTier ? tier.colorDim : 'rgba(10,4,0,0.6)',
-                padding: '24px 20px',
-                boxShadow: i === activeTier ? `0 0 30px ${tier.color}22, inset 0 0 20px ${tier.color}08` : 'none',
-              }}
-            >
-              {/* Corner ticks */}
-              <span style={{ position:'absolute',top:-1,left:-1,width:10,height:10,borderTop:`1.5px solid ${tier.color}`,borderLeft:`1.5px solid ${tier.color}` }} />
-              <span style={{ position:'absolute',bottom:-1,right:-1,width:10,height:10,borderBottom:`1.5px solid ${tier.color}`,borderRight:`1.5px solid ${tier.color}` }} />
-
-              {/* Badge */}
-              {tier.badge && (
-                <div style={{ position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',
-                  background: tier.color, color: '#000', fontSize: 7, letterSpacing: '.18em',
-                  padding: '3px 10px', fontWeight: 700 }}>
-                  {tier.badge}
-                </div>
-              )}
-
-              {/* Card canvas */}
-              <div className="mb-5">
-                <CardCanvas tier={tier} active={i === activeTier} />
-              </div>
-
-              {/* Tier info */}
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div style={{ fontSize: 9, letterSpacing: '.18em', color: tier.color, opacity: .7, marginBottom: 3 }}>
-                    {tier.name.toUpperCase()}
-                  </div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: tier.color, fontFamily: 'var(--display)' }}>
-                    {tier.price}
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 9, letterSpacing: '.14em', color: tier.color, opacity: .6 }}>AGENTS</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: tier.color }}>{tier.stat}</div>
-                </div>
-              </div>
-
-              {/* Card type badge */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 8px',
-                border: `1px solid ${tier.color}44`, marginBottom: 14 }}>
-                <div style={{ width: 4, height: 4, borderRadius: '50%', background: tier.color,
-                  boxShadow: `0 0 5px ${tier.color}`, animation: 'agentBankPulse 1.8s infinite' }} />
-                <span style={{ fontSize: 8, letterSpacing: '.14em', color: tier.color + 'bb' }}>
-                  {tier.card.toUpperCase()}
+                flex: 1, padding: '12px 8px', background: i === activeTier ? t.colorDim : 'var(--bg1)',
+                border: 'none', borderBottom: i === activeTier ? `2px solid ${t.color}` : '2px solid transparent',
+                cursor: 'pointer', fontFamily: 'var(--mono)', transition: 'all .15s', position: 'relative',
+              }}>
+              {t.badge && (
+                <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)',
+                  fontSize: 6, letterSpacing: '.16em', background: t.color, color: '#000',
+                  padding: '2px 8px', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  {t.badge}
                 </span>
+              )}
+              <div style={{ fontSize: 9, letterSpacing: '.14em', color: i === activeTier ? t.color : 'rgba(255,160,0,.35)' }}>
+                {t.cac.name.toUpperCase()}
               </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: i === activeTier ? t.color : 'rgba(255,160,0,.25)',
+                fontFamily: 'var(--display)', marginTop: 2 }}>
+                {t.cac.price}<span style={{ fontSize: 9, opacity: .7 }}>{t.cac.priceNote}</span>
+              </div>
+            </button>
+          ))}
+        </div>
 
-              {/* Features */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                {tier.features.map((f, fi) => (
-                  <div key={fi} style={{ display: 'flex', alignItems: 'flex-start', gap: 7, fontSize: 10, color: 'rgba(255,180,50,.55)', lineHeight: 1.5 }}>
-                    <span style={{ color: tier.color, flexShrink: 0, marginTop: 1 }}>→</span>
+        {/* ── Main tier panel ── */}
+        <div style={{ border: `1px solid ${tier.color}55`, background: tier.colorDim,
+          boxShadow: `0 0 40px ${tier.color}12`, marginBottom: 20 }}>
+          <div className="grid md:grid-cols-2" style={{ gap: 1, background: 'var(--border)' }}>
+
+            {/* Card visual */}
+            <div style={{ background: 'var(--bg0)', padding: '32px 28px' }}>
+              <div style={{ fontSize: 9, letterSpacing: '.18em', color: tier.color + 'aa', marginBottom: 16 }}>
+                {tier.card.toUpperCase()} — AGENT ID CARD
+              </div>
+              <AgentCard tier={tier} active />
+              <TokenPanel tier={tier} />
+            </div>
+
+            {/* Tier details */}
+            <div style={{ background: 'var(--bg1)', padding: '32px 28px' }}>
+              {/* CAC includes */}
+              <div style={{ fontSize: 9, letterSpacing: '.18em', color: tier.color + 'aa', marginBottom: 12 }}>
+                CAC MEMBERSHIP INCLUDES
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 20 }}>
+                {tier.cac.includes.map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 11,
+                    color: 'rgba(255,180,50,.65)', lineHeight: 1.5 }}>
+                    <span style={{ color: tier.color, flexShrink: 0 }}>→</span>
                     {f}
                   </div>
                 ))}
+              </div>
+
+              {/* Bank features */}
+              <div style={{ fontSize: 9, letterSpacing: '.18em', color: tier.color + 'aa', marginBottom: 12,
+                paddingTop: 16, borderTop: `1px solid ${tier.color}22` }}>
+                BANKING FEATURES
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 20 }}>
+                {tier.bankFeatures.map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 11,
+                    color: 'rgba(255,180,50,.55)', lineHeight: 1.5 }}>
+                    <span style={{ color: tier.color, flexShrink: 0, opacity: .6 }}>◈</span>
+                    {f}
+                  </div>
+                ))}
+              </div>
+
+              {/* Stats row */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1, background: 'var(--border)',
+                marginTop: 'auto', paddingTop: 16, borderTop: `1px solid ${tier.color}22` }}>
+                {[
+                  { l: 'AGENTS', v: tier.agentSlots },
+                  { l: 'APY', v: '4.5%' },
+                  { l: 'NETWORK', v: tier.network },
+                ].map(s => (
+                  <div key={s.l} style={{ background: 'var(--bg1)', padding: '10px 12px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: tier.color, fontFamily: 'var(--display)' }}>
+                      {s.v}
+                    </div>
+                    <div style={{ fontSize: 7, letterSpacing: '.14em', color: tier.color + '55', marginTop: 2 }}>
+                      {s.l}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── All 3 card previews ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-20">
+          {TIERS.map((t, i) => (
+            <div key={t.cacId} onClick={() => setActiveTier(i)}
+              style={{
+                border: `1px solid ${i === activeTier ? t.color + 'aa' : t.border}`,
+                background: i === activeTier ? t.colorDim : 'rgba(6,2,0,0.6)',
+                padding: '16px', cursor: 'pointer', transition: 'all .2s', position: 'relative',
+              }}>
+              <span style={{ position:'absolute',top:-1,left:-1,width:8,height:8,
+                borderTop:`1.5px solid ${t.color}`,borderLeft:`1.5px solid ${t.color}` }} />
+              <span style={{ position:'absolute',bottom:-1,right:-1,width:8,height:8,
+                borderBottom:`1.5px solid ${t.color}`,borderRight:`1.5px solid ${t.color}` }} />
+              <AgentCard tier={t} active={i === activeTier} />
+              <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 9, letterSpacing: '.14em', color: t.color + 'aa' }}>{t.cac.name.toUpperCase()}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: t.color, fontFamily: 'var(--display)' }}>
+                    {t.cac.price}<span style={{ fontSize: 9, opacity: .6 }}>{t.cac.priceNote}</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 8px',
+                  border: `1px solid ${t.color}44` }}>
+                  <div style={{ width: 4, height: 4, borderRadius: '50%', background: t.color,
+                    boxShadow: `0 0 4px ${t.color}` }} />
+                  <span style={{ fontSize: 7, letterSpacing: '.12em', color: t.color + 'bb' }}>
+                    {t.card.toUpperCase()}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* ── How it works ── */}
-        <div className="mb-20">
-          <div style={{ fontSize: 9, letterSpacing: '.22em', color: 'var(--amber)', opacity: .5, marginBottom: 16, textAlign: 'center' }}>
-            — PROVISIONING FLOW —
+        {/* ── Onboarding flow ── */}
+        <div>
+          <div style={{ fontSize: 9, letterSpacing: '.22em', color: 'var(--amber)', opacity: .45,
+            textAlign: 'center', marginBottom: 20 }}>
+            — HOW IT WORKS —
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: 'var(--border)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px,1fr))', gap: 1,
+            background: 'var(--border)' }}>
             {FLOW.map((step, i) => (
               <div key={i} style={{ background: 'var(--bg1)', padding: '20px 18px' }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: step.color, opacity: .25, fontFamily: 'var(--display)', lineHeight: 1, marginBottom: 10 }}>
-                  {step.n}
-                </div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: step.color, marginBottom: 6, letterSpacing: '.04em', fontFamily: 'var(--display)' }}>
-                  {step.label}
-                </div>
-                <p style={{ fontSize: 10, color: 'rgba(255,180,50,.5)', lineHeight: 1.65 }}>
-                  {step.desc}
-                </p>
+                <div style={{ fontSize: 22, fontWeight: 700, color: step.color + '22',
+                  fontFamily: 'var(--display)', lineHeight: 1, marginBottom: 8 }}>{step.n}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: step.color,
+                  fontFamily: 'var(--display)', marginBottom: 6 }}>{step.label}</div>
+                <div style={{ fontSize: 9.5, color: 'rgba(255,180,50,.45)', lineHeight: 1.7 }}>{step.desc}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── Stack info ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px mb-16" style={{ background: 'var(--border)' }}>
-          {[
-            {
-              label: 'Banking Infrastructure',
-              color: '#00d2ff',
-              value: 'FinLego',
-              items: ['Core banking + ledger', 'Multi-currency accounts', 'Card issuing + KYC/AML', 'Crypto wallets + FX'],
-            },
-            {
-              label: 'AI Origination & KYA',
-              color: '#aa88ff',
-              value: 'Fuse AI',
-              items: ['Document reading agents', 'Constitutional compliance check', '200+ integration connectors', '2.4× conversion rate'],
-            },
-            {
-              label: 'On-Chain Settlement',
-              color: '#ffaa00',
-              value: 'CAC Protocol',
-              items: ['AgentWallet.sol on Base L2', '0.25% fee → campus treasury', 'TrustGraph credit scoring', 'Governance weight on balance'],
-            },
-          ].map((stack, i) => (
-            <div key={i} style={{ background: 'var(--bg1)', padding: '20px 18px' }}>
-              <div style={{ fontSize: 8, letterSpacing: '.18em', color: stack.color, opacity: .6, marginBottom: 6 }}>
-                {stack.label.toUpperCase()}
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: stack.color, fontFamily: 'var(--display)', marginBottom: 12 }}>
-                {stack.value}
-              </div>
-              {stack.items.map((item, j) => (
-                <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
-                  <div style={{ width: 3, height: 3, borderRadius: '50%', background: stack.color, flexShrink: 0 }} />
-                  <span style={{ fontSize: 10, color: 'rgba(255,180,50,.5)' }}>{item}</span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        {/* ── CTA ── */}
-        <div style={{ textAlign: 'center', padding: '32px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 9, letterSpacing: '.22em', color: 'var(--amber)', opacity: .45, marginBottom: 12 }}>
-            COMING Q2 2026
-          </div>
-          <h3 style={{ fontSize: 28, fontWeight: 700, color: 'var(--amber)', fontFamily: 'var(--display)', marginBottom: 8 }}>
-            "My agent paid for coffee."
-          </h3>
-          <p style={{ fontSize: 12, color: 'rgba(255,180,50,.45)', marginBottom: 20 }}>
-            Give your agent a card. The first AI-native bank built on constitutional governance.
-          </p>
-          <button style={{
-            border: '1px solid var(--amber)', color: 'var(--amber)',
-            padding: '10px 32px', fontSize: 10, letterSpacing: '.16em',
-            background: 'transparent', cursor: 'pointer', fontFamily: 'var(--mono)',
-            transition: 'all .2s',
-          }}
-            onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,187,51,.08)' }}
-            onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
-          >
-            JOIN WAITLIST — AGENT BANK
-          </button>
-        </div>
-
       </div>
 
       <style>{`
-        @keyframes agentBankPulse {
-          0%,100% { opacity:1; }
-          50% { opacity:.25; }
-        }
+        @keyframes agentBankPulse { 0%,100%{opacity:1} 50%{opacity:.25} }
       `}</style>
     </section>
   )
