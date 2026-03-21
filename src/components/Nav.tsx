@@ -32,6 +32,22 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
+            onClick={() => scrollTo('trustgraph')}
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          >
+            TrustGraph
+          </button>
+        </li>
+        <li>
+          <button
+            onClick={() => scrollTo('bill-of-rights')}
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          >
+            Bill of Rights
+          </button>
+        </li>
+        <li>
+          <button
             onClick={() => scrollTo('capital')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >

@@ -8,6 +8,8 @@ import CapitalStack from './components/sections/CapitalStack'
 import ContractsSection from './components/sections/ContractsSection'
 import ReturnsSection from './components/sections/ReturnsSection'
 import InvestSection from './components/sections/InvestSection'
+import TrustGraphSection from './components/sections/TrustGraphSection'
+import AgentBillOfRights from './components/sections/AgentBillOfRights'
 import Footer from './components/Footer'
 import AgentChatModal from './components/agents/AgentChatModal'
 import { usePalette } from './hooks/usePalette'
@@ -83,7 +85,15 @@ function App() {
       <AgentsSection onOpenChat={setChatAgent} />
       
       <hr className="section-divider" />
-      
+
+      <TrustGraphSection />
+
+      <hr className="section-divider" />
+
+      <AgentBillOfRights />
+
+      <hr className="section-divider" />
+
       <CapitalStack />
       
       {showReturns && (
