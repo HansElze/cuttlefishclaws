@@ -88,12 +88,20 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
       </ul>
       
-      <button
-        onClick={() => scrollTo('invest')}
-        className="text-[10px] tracking-[0.14em] uppercase py-1.5 px-4 border border-[var(--amber2)] text-[var(--amber)] bg-[rgba(255,140,0,0.08)] hover:bg-[rgba(255,140,0,0.18)] transition-all cursor-pointer font-mono"
-      >
-        Invest &rarr;
-      </button>
+      <div className="flex items-center gap-3">
+        <a
+          href="/presale"
+          className="text-[10px] tracking-[0.14em] uppercase py-1.5 px-4 border border-[var(--green)] text-[var(--green)] bg-[rgba(0,255,204,0.08)] hover:bg-[rgba(0,255,204,0.18)] transition-all font-mono no-underline"
+        >
+          Reserve &rarr;
+        </a>
+        <button
+          onClick={() => scrollTo('invest')}
+          className="text-[10px] tracking-[0.14em] uppercase py-1.5 px-4 border border-[var(--amber2)] text-[var(--amber)] bg-[rgba(255,140,0,0.08)] hover:bg-[rgba(255,140,0,0.18)] transition-all cursor-pointer font-mono"
+        >
+          Invest &rarr;
+        </button>
+      </div>
     </nav>
   )
 }
