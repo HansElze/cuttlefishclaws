@@ -99,7 +99,7 @@ export default function InvestSection({ scrollTo, onShowReturns }: Props) {
               DAO-REIT Investor Inquiry
             </h3>
             <p className="text-[10px] tracking-[0.06em] text-[rgba(255,160,0,0.5)] mt-1">
-              Trib receives this directly. Expect a response within 24 hours.
+              Your inquiry is captured server-side and routed for manual follow-up. Expect a response within 24 hours.
             </p>
           </div>
 
@@ -107,7 +107,7 @@ export default function InvestSection({ scrollTo, onShowReturns }: Props) {
             <div className="py-8 text-center">
               <div className="text-[var(--green)] text-[11px] tracking-[0.1em] mb-2">INQUIRY RECEIVED</div>
               <p className="text-[10px] text-[rgba(255,160,0,0.6)] tracking-[0.06em]">
-                Trib has your inquiry and will follow up at {form.email}
+                Your inquiry was captured successfully and we will follow up at {form.email}
               </p>
             </div>
           ) : (
@@ -179,7 +179,7 @@ export default function InvestSection({ scrollTo, onShowReturns }: Props) {
               </div>
               {formState === 'error' && (
                 <p className="text-[9px] text-[var(--red)] tracking-[0.06em]">
-                  Submission failed. Email invest@cuttlefish.ai directly.
+                  Submission failed. Email dvdelze@gmail.com directly.
                 </p>
               )}
             </form>

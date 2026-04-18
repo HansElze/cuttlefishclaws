@@ -125,6 +125,41 @@ CREATE TABLE IF NOT EXISTS financing_programs (
   updated_at           TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS presale_reservations (
+  id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name              TEXT NOT NULL,
+  email                  TEXT NOT NULL,
+  participant_type       TEXT NOT NULL CHECK (participant_type IN ('human','agent','both')),
+  payment_rail           TEXT NOT NULL CHECK (payment_rail IN ('stripe','usdc_base')),
+  reservation_tier       TEXT NOT NULL DEFAULT 'builder' CHECK (reservation_tier IN ('resident','builder','sovereign','anchor')),
+  reservation_amount_usd NUMERIC(12,2) NOT NULL DEFAULT 100.00,
+  wallet_address         TEXT,
+  tx_hash                TEXT,
+  referral               TEXT,
+  notes                  TEXT,
+  operator_name          TEXT,
+  owner_jurisdiction     TEXT,
+  intended_wallet_address TEXT,
+  stripe_checkout_session_id TEXT,
+  stripe_payment_intent_id TEXT,
+  paid_at                 TIMESTAMPTZ,
+  payment_status         TEXT NOT NULL DEFAULT 'payment_submitted' CHECK (
+                           payment_status IN ('pending_payment','payment_submitted','payment_confirmed')
+                         ),
+  kya_status             TEXT NOT NULL DEFAULT 'not_started' CHECK (
+                           kya_status IN ('not_started','submitted','under_review','approved','rejected')
+                         ),
+  status                 TEXT NOT NULL DEFAULT 'pending_confirmation' CHECK (
+                           status IN ('pending_confirmation','confirmed','kya_pending','wallet_pending','ready_for_issuance','issued','cancelled')
+                         ),
+  source_path            TEXT DEFAULT '/presale',
+  followup_submitted_at  TIMESTAMPTZ,
+  wallet_bound_at        TIMESTAMPTZ,
+  metadata               JSONB NOT NULL DEFAULT '{}',
+  created_at             TIMESTAMPTZ DEFAULT NOW(),
+  updated_at             TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================================
 -- Indexes
 -- ============================================================
@@ -137,6 +172,10 @@ CREATE INDEX IF NOT EXISTS idx_trust_events_did    ON trust_events(agent_did);
 CREATE INDEX IF NOT EXISTS idx_tasks_assigned      ON agent_tasks(assigned_to, status);
 CREATE INDEX IF NOT EXISTS idx_capital_order       ON capital_stack(display_order);
 CREATE INDEX IF NOT EXISTS idx_financing_order     ON financing_programs(display_order);
+CREATE INDEX IF NOT EXISTS idx_presale_email       ON presale_reservations(email);
+CREATE INDEX IF NOT EXISTS idx_presale_status      ON presale_reservations(status);
+CREATE INDEX IF NOT EXISTS idx_presale_created_at  ON presale_reservations(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_presale_stripe_checkout_session ON presale_reservations(stripe_checkout_session_id);
 
 -- ============================================================
 -- Row Level Security
@@ -148,6 +187,7 @@ ALTER TABLE trust_events       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agent_tasks        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE capital_stack      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE financing_programs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE presale_reservations ENABLE ROW LEVEL SECURITY;
 
 -- Public read policies
 CREATE POLICY "public_trust_read"
@@ -187,6 +227,10 @@ CREATE TRIGGER capital_stack_updated_at
 
 CREATE TRIGGER financing_programs_updated_at
   BEFORE UPDATE ON financing_programs
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER presale_reservations_updated_at
+  BEFORE UPDATE ON presale_reservations
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ============================================================

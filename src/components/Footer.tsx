@@ -37,8 +37,8 @@ const COLS = [
     label: 'CONTACT',
     dot: '#aa88ff',
     links: [
-      { label: 'invest@cuttlefish.ai', href: 'mailto:invest@cuttlefish.ai', ext: true },
-      { label: 'legal@cuttlefish.ai', href: 'mailto:legal@cuttlefish.ai', ext: true },
+      { label: 'dvdelze@gmail.com', href: 'mailto:dvdelze@gmail.com', ext: true },
+      { label: 'CAC Presale Contact', href: 'mailto:dvdelze@gmail.com?subject=CAC%20Presale%20Inquiry', ext: true },
       { label: 'Discord Community ↗', href: 'https://discord.gg/cuttlefish', ext: true },
       { label: 'Cuttlefish Claw Product ↗', href: 'https://cuttlefishclaw.com', ext: true },
     ],

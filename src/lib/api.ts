@@ -88,6 +88,27 @@ export interface CACStatusResult {
   error?: string
 }
 
+export interface PresaleReservationResult {
+  success: boolean
+  reservationId?: string
+  status?: string
+  paymentStatus?: string
+  stripeCheckoutUrl?: string
+  stripeCheckoutSessionId?: string
+  message?: string
+  nextStep?: string
+  error?: string
+}
+
+export interface PresaleFollowupResult {
+  success: boolean
+  reservationId?: string
+  status?: string
+  kyaStatus?: string
+  message?: string
+  error?: string
+}
+
 export interface CapitalStackLayer {
   layer_key: string
   name: string
@@ -185,5 +206,29 @@ export const api = {
         'agent-x-post',
         { draft, operator_approved }
       ),
+  },
+
+  presale: {
+    reserve: (payload: {
+      fullName: string
+      email: string
+      participantType: 'human' | 'agent' | 'both'
+      paymentRail: 'stripe' | 'usdc_base'
+      reservationTier?: 'builder'
+      reservationAmountUsd?: number
+      walletAddress?: string
+      txHash?: string
+      referral?: string
+      notes?: string
+      sourcePath?: string
+    }) => post<PresaleReservationResult>('presale-reservation', payload),
+
+    followup: (payload: {
+      reservationId: string
+      walletAddress: string
+      operatorName?: string
+      ownerJurisdiction: string
+      notes?: string
+    }) => post<PresaleFollowupResult>('presale-followup', payload),
   },
 }
