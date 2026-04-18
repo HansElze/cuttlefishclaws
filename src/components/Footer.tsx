@@ -20,7 +20,7 @@ const COLS = [
       { label: 'Smart Contracts', href: '/#contracts' },
       { label: 'Agent Registry', href: '/#agents' },
       { label: 'VC Briefing', href: '/#invest' },
-      { label: 'Invest → ', href: '#invest' },
+      { label: 'Invest → ', href: '/#invest' },
     ],
   },
   {

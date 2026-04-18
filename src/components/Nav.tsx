@@ -1,4 +1,3 @@
-import { useLocation, useNavigate } from 'react-router-dom'
 import type { PaletteKey } from '../hooks/usePalette'
 
 interface NavProps {
@@ -7,110 +6,85 @@ interface NavProps {
   togglePalette: () => void
 }
 
-export default function Nav({ scrollTo }: NavProps) {
-  const location = useLocation()
-  const navigate = useNavigate()
-
-  const handleSectionNav = (id: string) => {
-    if (location.pathname === '/') {
-      scrollTo(id)
-      return
-    }
-
-    navigate(`/#${id}`)
-  }
-
-  const handleHomeNav = () => {
-    if (location.pathname === '/') {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-      return
-    }
-
-    navigate('/')
-  }
-
+export default function Nav({ scrollTo: _scrollTo }: NavProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-[100] px-8 py-3.5 flex items-center justify-between border-b border-[var(--border)] bg-[rgba(6,2,0,0.85)] backdrop-blur-sm">
-      <button
-        type="button"
-        onClick={handleHomeNav}
-        className="font-display text-base font-bold tracking-[0.2em] text-[var(--amber)] no-underline bg-transparent border-none cursor-pointer"
-      >
+      <a href="/" className="font-display text-base font-bold tracking-[0.2em] text-[var(--amber)] no-underline">
         Tributary
-      </button>
+      </a>
       
       <ul className="hidden md:flex gap-7 list-none">
         <li>
-          <button
-            onClick={() => handleSectionNav('cac')}
-            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          <a
+            href="/#cac"
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors font-mono no-underline"
           >
             CAC Protocol
-          </button>
+          </a>
         </li>
         <li>
-          <button
-            onClick={() => handleSectionNav('cac-spec')}
-            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          <a
+            href="/#cac-spec"
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors font-mono no-underline"
           >
             Spec Docs
-          </button>
+          </a>
         </li>
         <li>
-          <button
-            onClick={() => handleSectionNav('agents')}
-            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          <a
+            href="/#agents"
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors font-mono no-underline"
           >
             Agents
-          </button>
+          </a>
         </li>
         <li>
-          <button
-            onClick={() => handleSectionNav('trustgraph')}
-            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          <a
+            href="/#trustgraph"
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors font-mono no-underline"
           >
             TrustGraph
-          </button>
+          </a>
         </li>
         <li>
-          <button
-            onClick={() => handleSectionNav('bill-of-rights')}
-            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          <a
+            href="/#bill-of-rights"
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors font-mono no-underline"
           >
             Bill of Rights
-          </button>
+          </a>
         </li>
         <li>
-          <button
-            onClick={() => handleSectionNav('capital')}
-            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          <a
+            href="/#capital"
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors font-mono no-underline"
           >
             Capital Stack
-          </button>
+          </a>
         </li>
         <li>
-          <button
-            onClick={() => handleSectionNav('contracts')}
-            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          <a
+            href="/#contracts"
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors font-mono no-underline"
           >
             Contracts
-          </button>
+          </a>
         </li>
         <li>
-          <button
-            onClick={() => handleSectionNav('agent-bank')}
-            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          <a
+            href="/#agent-bank"
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors font-mono no-underline"
           >
             Agent Bank
-          </button>
+          </a>
         </li>
         <li>
-          <button
-            onClick={() => handleSectionNav('kya')}
-            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
+          <a
+            href="/#kya"
+            className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors font-mono no-underline"
           >
             KYA Protocol
-          </button>
+          </a>
         </li>
       </ul>
       
@@ -121,12 +95,12 @@ export default function Nav({ scrollTo }: NavProps) {
         >
           Reserve &rarr;
         </a>
-        <button
-          onClick={() => handleSectionNav('invest')}
-          className="text-[10px] tracking-[0.14em] uppercase py-1.5 px-4 border border-[var(--amber2)] text-[var(--amber)] bg-[rgba(255,140,0,0.08)] hover:bg-[rgba(255,140,0,0.18)] transition-all cursor-pointer font-mono"
+        <a
+          href="/#invest"
+          className="text-[10px] tracking-[0.14em] uppercase py-1.5 px-4 border border-[var(--amber2)] text-[var(--amber)] bg-[rgba(255,140,0,0.08)] hover:bg-[rgba(255,140,0,0.18)] transition-all cursor-pointer font-mono no-underline"
         >
           Invest &rarr;
-        </button>
+        </a>
       </div>
     </nav>
   )
