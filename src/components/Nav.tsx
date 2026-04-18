@@ -1,3 +1,4 @@
+import { useLocation, useNavigate } from 'react-router-dom'
 import type { PaletteKey } from '../hooks/usePalette'
 
 interface NavProps {
@@ -7,16 +8,41 @@ interface NavProps {
 }
 
 export default function Nav({ scrollTo }: NavProps) {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const handleSectionNav = (id: string) => {
+    if (location.pathname === '/') {
+      scrollTo(id)
+      return
+    }
+
+    navigate(`/#${id}`)
+  }
+
+  const handleHomeNav = () => {
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+
+    navigate('/')
+  }
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-[100] px-8 py-3.5 flex items-center justify-between border-b border-[var(--border)] bg-[rgba(6,2,0,0.85)] backdrop-blur-sm">
-      <a href="#" className="font-display text-base font-bold tracking-[0.2em] text-[var(--amber)] no-underline">
+      <button
+        type="button"
+        onClick={handleHomeNav}
+        className="font-display text-base font-bold tracking-[0.2em] text-[var(--amber)] no-underline bg-transparent border-none cursor-pointer"
+      >
         Tributary
-      </a>
+      </button>
       
       <ul className="hidden md:flex gap-7 list-none">
         <li>
           <button
-            onClick={() => scrollTo('cac')}
+            onClick={() => handleSectionNav('cac')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
             CAC Protocol
@@ -24,7 +50,7 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
-            onClick={() => scrollTo('cac-spec')}
+            onClick={() => handleSectionNav('cac-spec')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
             Spec Docs
@@ -32,7 +58,7 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
-            onClick={() => scrollTo('agents')}
+            onClick={() => handleSectionNav('agents')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
             Agents
@@ -40,7 +66,7 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
-            onClick={() => scrollTo('trustgraph')}
+            onClick={() => handleSectionNav('trustgraph')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
             TrustGraph
@@ -48,7 +74,7 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
-            onClick={() => scrollTo('bill-of-rights')}
+            onClick={() => handleSectionNav('bill-of-rights')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
             Bill of Rights
@@ -56,7 +82,7 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
-            onClick={() => scrollTo('capital')}
+            onClick={() => handleSectionNav('capital')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
             Capital Stack
@@ -64,7 +90,7 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
-            onClick={() => scrollTo('contracts')}
+            onClick={() => handleSectionNav('contracts')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
             Contracts
@@ -72,7 +98,7 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
-            onClick={() => scrollTo('agent-bank')}
+            onClick={() => handleSectionNav('agent-bank')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
             Agent Bank
@@ -80,7 +106,7 @@ export default function Nav({ scrollTo }: NavProps) {
         </li>
         <li>
           <button
-            onClick={() => scrollTo('kya')}
+            onClick={() => handleSectionNav('kya')}
             className="text-[10px] tracking-[0.14em] uppercase text-[rgba(255,160,0,0.6)] hover:text-[var(--amber)] transition-colors bg-transparent border-none cursor-pointer font-mono"
           >
             KYA Protocol
@@ -96,7 +122,7 @@ export default function Nav({ scrollTo }: NavProps) {
           Reserve &rarr;
         </a>
         <button
-          onClick={() => scrollTo('invest')}
+          onClick={() => handleSectionNav('invest')}
           className="text-[10px] tracking-[0.14em] uppercase py-1.5 px-4 border border-[var(--amber2)] text-[var(--amber)] bg-[rgba(255,140,0,0.08)] hover:bg-[rgba(255,140,0,0.18)] transition-all cursor-pointer font-mono"
         >
           Invest &rarr;

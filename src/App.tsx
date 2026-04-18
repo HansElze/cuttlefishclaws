@@ -38,6 +38,24 @@ function App() {
     }
   }, [location])
 
+  useEffect(() => {
+    if (!location.hash) {
+      return
+    }
+
+    const id = location.hash.replace('#', '')
+
+    if (id === 'returns') {
+      setShowReturns(true)
+    }
+
+    const timeout = window.setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 120)
+
+    return () => window.clearTimeout(timeout)
+  }, [location.hash])
+
   const handleVCAccess = (code: string) => {
     if (code.toUpperCase() === import.meta.env.VITE_VC_CODE || code.toUpperCase() === 'TRIBUTARY2026') {
       sessionStorage.setItem('vc_access', '1')
